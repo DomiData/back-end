@@ -46,5 +46,3 @@ def baixar_dados_brutos(sigla, ano):
             return pd.DataFrame()
         print(f" Erro no download de {sigla}: {e}")
         return pd.DataFrame()
-if __name__ == "__main__":
-    main()
