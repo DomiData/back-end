@@ -1,0 +1,40 @@
+name: FastAPI CI Pipeline
+
+on:
+  pull_request:
+    branches: ["main", "develop"]
+  push:
+    branches:
+      - 'main'
+      - 'develop'
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install ruff mypy bandit pip-audit types-requests
+
+      - name: Lint & Format (Ruff)
+        run: |
+          ruff check . 
+          ruff format --check .
+
+      - name: Type Checking (Mypy)
+        run: mypy . --install-types --non-interactive
+      
+      - name: Security Scan (Bandit & Audit)
+        run: |
+          bandit -r app/ -c pyproject.toml   # Scan no código
+          pip-audit                          # Scan nas dependências
