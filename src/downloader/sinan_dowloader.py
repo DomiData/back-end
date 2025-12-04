@@ -1,7 +1,6 @@
 from pysus.online_data.SINAN import download
 from pysus.ftp.databases.sinan import SINAN
 import pandas as pd
-import os
 
 def normalizar_retorno_pysus(raw_data):
     if hasattr(raw_data, 'to_dataframe'):
