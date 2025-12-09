@@ -4,14 +4,14 @@ from merger.sinan_merger import mesclar_csvs_sinan
 import os
 
 def main():
-    ANO = 2025
+    ANO = list(range(2000,2026))
     ESTADO_FILTRO = '25'
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))    
     PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
     RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
     PROCESSED_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
-    MERGED_OUTPUT_PATH = os.path.join(PROCESSED_DATA_DIR, "merged", "sinan_merged.csv")
+    MERGED_OUTPUT_PATH = os.path.join(PROJECT_ROOT, "data",  "merged", "sinan_merged.csv")
     
     COLUNAS_DESEJADAS = [
     'DT_NOTIFIC', 'DT_SIN_PRI', 'DT_OCORR', # Datas possíveis

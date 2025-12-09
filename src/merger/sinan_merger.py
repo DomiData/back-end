@@ -16,7 +16,7 @@ def extrair_codigo_doenca(nome_arquivo: str) -> str:
 
 
 def mesclar_csvs_sinan(
-    diretorio_processados: str, caminho_saida: Optional[str] = "data/processed/merged"
+    diretorio_processados: str, caminho_saida: Optional[str] = "data/merged"
 ) -> pd.DataFrame:
     if not os.path.exists(diretorio_processados):
         raise FileNotFoundError(f"Directory not found: {diretorio_processados}")
