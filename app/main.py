@@ -2,6 +2,11 @@ from typing import Union
 
 from fastapi import FastAPI
 
+async def lifespan(app: FastAPI):
+    # Startup code here
+    yield
+    # Shutdown code here
+
 app = FastAPI()
 
 
