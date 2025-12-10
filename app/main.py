@@ -1,13 +1,13 @@
 from typing import Union
-
 from fastapi import FastAPI
+from app.core.database import create_db
 
 async def lifespan(app: FastAPI):
-    # Startup code here
+    await create_db()
     yield
     # Shutdown code here
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
