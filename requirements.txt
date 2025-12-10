@@ -41,3 +41,4 @@ websockets==15.0.1
 sqlalchemy
 pydantic-settings
 asyncpg
+firebase-admin
