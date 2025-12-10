@@ -6,7 +6,7 @@ ENV_PATH = Path(__file__).resolve().parent.parent.parent / ".env"
 
 class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn
-    SECRET_KEY: str
+    FRONTEND_URL: str
     model_config = SettingsConfigDict(
         env_file=ENV_PATH,
         extra="ignore",
