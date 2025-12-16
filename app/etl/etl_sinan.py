@@ -1,4 +1,4 @@
-from downloader.sinan_dowloader import baixar_dados_brutos, obter_lista_doencas
+from downloader.sinan_downloader import baixar_dados_brutos, obter_lista_doencas
 from cleaner.sinan_cleaner import filtrar_estado_e_colunas
 import os
 
@@ -7,7 +7,7 @@ def main():
     ESTADO_FILTRO = '25'
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))    
-    PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
     RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
     PROCESSED_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
     

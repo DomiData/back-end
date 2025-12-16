@@ -1,4 +1,4 @@
-from downloader.cnes_dowloader import baixar_cnes_bruto
+from downloader.cnes_downloader import baixar_cnes_bruto
 from cleaner.cnes_cleaner import processar_cnes
 import os
 
@@ -16,7 +16,7 @@ def main():
     ]
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.dirname(BASE_DIR)
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
 
     RAW_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
     PROCESSED_DIR = os.path.join(PROJECT_ROOT, "cnes")
