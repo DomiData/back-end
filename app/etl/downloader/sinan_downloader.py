@@ -1,32 +1,37 @@
 from pysus.online_data.SINAN import download
 from pysus.ftp.databases.sinan import SINAN
 import pandas as pd
-import os
+from app.utils.logger import logger
 
-def normalizar_retorno_pysus(raw_data):
-    if hasattr(raw_data, 'to_dataframe'):
-        return raw_data.to_dataframe()
-    elif isinstance(raw_data, pd.DataFrame):
-        return raw_data
-    elif isinstance(raw_data, list):
-        lista_dfs = []
-        for item in raw_data:
-            if hasattr(item, 'to_dataframe'):
-                lista_dfs.append(item.to_dataframe())
-            elif isinstance(item, pd.DataFrame):
-                lista_dfs.append(item)
-        if lista_dfs:
-            return pd.concat(lista_dfs)
+def normalize_pysus_return(raw_data):
+    try:
+        if hasattr(raw_data, 'to_dataframe'):
+            return raw_data.to_dataframe()
+        elif isinstance(raw_data, pd.DataFrame):
+            return raw_data
+        elif isinstance(raw_data, list):
+            df_list = []
+            for item in raw_data:
+                if hasattr(item, 'to_dataframe'):
+                    df_list.append(item.to_dataframe())
+                elif isinstance(item, pd.DataFrame):
+                    df_list.append(item)
+            
+            if df_list:
+                return pd.concat(df_list, ignore_index=True)
+                
+    except Exception as e:
+        logger.error(f"Error during PySUS data normalization: {e}")
+        
     return pd.DataFrame()
 
-def obter_lista_doencas():
+def get_disease_list():
     try:
-        print("Conectando ao metadados do SINAN...")
+        logger.info("Connecting to SINAN metadata...")
         sinan_metadata = SINAN().load()
         return sinan_metadata.diseases
     except Exception as e:
-        print(f"Aviso: Metadados offline ({e}). Usando lista básica.")
-        # TODO popular mais essa lista default
+        logger.warning(f"Metadata offline or unreachable ({e}). Using fallback list.")
         return {
             'DENG': 'Dengue', 
             'CHIK': 'Chikungunya', 
@@ -36,13 +41,18 @@ def obter_lista_doencas():
             'LEIV': 'Leishmaniose_Visceral'
         }
 
-def baixar_dados_brutos(sigla, ano):
-    print(f" Baixando {sigla} ({ano})...")
+def download_raw_data(acronym, year):
+    logger.info(f"Downloading data for {acronym} (Year: {year})...")
     try:
-        raw_data = download(diseases=sigla, years=ano)
-        return normalizar_retorno_pysus(raw_data)
+        raw_data = download(diseases=acronym, years=year)
+        df = normalize_pysus_return(raw_data)
+        
+        if df.empty:
+            logger.warning(f"Download finished but no records were found for {acronym} in {year}.")
+        return df
     except Exception as e:
         if "No objects to concatenate" in str(e):
+            logger.warning(f"No data available for {acronym} in {year} (PySUS Empty Return).")
             return pd.DataFrame()
-        print(f" Erro no download de {sigla}: {e}")
+        logger.error(f"Failed to download {acronym}: {e}")
         return pd.DataFrame()

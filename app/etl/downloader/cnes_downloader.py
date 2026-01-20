@@ -4,27 +4,37 @@ import os
 import shutil
 from datetime import datetime
 import urllib3
+from app.utils.logger import logger
 
 urllib3.disable_warnings()
 
-def baixar_cnes_bruto(output_dir):
-
+def download_raw_cnes(output_dir):
     BASE_URL = "https://cnes.datasus.gov.br/EstatisticasServlet"
-    MAX_TENTATIVAS = 12
-    agora = datetime.now()
+    MAX_ATTEMPTS = 12
+    now = datetime.now()
 
-    for i in range(MAX_TENTATIVAS):
-        mes_calc = agora.month - i
-        ano_calc = agora.year
-        while mes_calc <= 0:
-            mes_calc += 12
-            ano_calc -= 1
-        competencia = f"{ano_calc}{mes_calc:02d}"
-        nome_zip = f"BASE_DE_DADOS_CNES_{competencia}.ZIP"
+    logger.info(f"Starting search for the most recent CNES database (Max attempts: {MAX_ATTEMPTS})")
+
+    for i in range(MAX_ATTEMPTS):
+        calc_month = now.month - i
+        calc_year = now.year
+        
+        while calc_month <= 0:
+            calc_month += 12
+            calc_year -= 1
+            
+        competence = f"{calc_year}{calc_month:02d}"
+        zip_name = f"BASE_DE_DADOS_CNES_{competence}.ZIP"
+        
+        logger.debug(f"Trying competence: {competence}...")
+
         try:            
             response = requests.get(
-                BASE_URL, params={'path': nome_zip}, 
-                stream=True, verify=False, timeout=60
+                BASE_URL, 
+                params={'path': zip_name}, 
+                stream=True, 
+                verify=False, 
+                timeout=60
             )
 
             content_type = response.headers.get('Content-Type', '').lower()
@@ -32,32 +42,39 @@ def baixar_cnes_bruto(output_dir):
                 continue
             
             iterator = response.iter_content(chunk_size=4)
-            primeiros_bytes = next(iterator, b'')
+            first_bytes = next(iterator, b'')
 
-            if not primeiros_bytes.startswith(b'PK'):
+            if not first_bytes.startswith(b'PK'):
+                logger.debug(f"Competence {competence} not available on server.")
                 continue
 
-            print(f"Baixando... (Isso pode demorar)")
-            zip_path = os.path.join(output_dir, f"temp_cnes_{competencia}.zip")
+            logger.info(f"Database found for {competence}! Starting download...")
+            
+            zip_path = os.path.join(output_dir, f"temp_cnes_{competence}.zip")
+            
             with open(zip_path, 'wb') as f:
-                f.write(primeiros_bytes)
+                f.write(first_bytes)
                 for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
+                    if chunk:
+                        f.write(chunk)
 
-            arquivo_final = None
+            final_file = None
+            logger.info("Extracting establishment table (tbEstabelecimento)...")
+            
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 for file in zip_ref.namelist():
                     if file.startswith('tbEstabelecimento'):
                         zip_ref.extract(file, output_dir)
-                        arquivo_final = os.path.join(output_dir, file)
+                        final_file = os.path.join(output_dir, file)
+                        logger.info(f"File extracted successfully: {file}")
                         break
             os.remove(zip_path)
 
-            if arquivo_final:
-                return arquivo_final
+            if final_file:
+                return final_file
 
         except Exception as e:
-            print(f"  Erro: {e}")
+            logger.error(f"Error while attempting to download competence {competence}: {e}")
             
-    print("Nenhum dado do CNES encontrado.")
+    logger.critical("No CNES data found after checking the last 12 months.")
     return None

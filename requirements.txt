@@ -8,3 +8,4 @@ uvicorn
 sqlalchemy
 pydantic-settings
 asyncpg
+colorlog

@@ -1,17 +1,23 @@
-from downloader.sinan_downloader import baixar_dados_brutos, obter_lista_doencas
-from cleaner.sinan_cleaner import filtrar_estado_e_colunas
 import os
+from app.etl.downloader.sinan_downloader import download_raw_data, get_disease_list
+from app.etl.cleaner.sinan_cleaner import filter_state_and_columns
+from app.utils.logger import logger
 
 def main():
-    ANO = 2025
-    ESTADO_FILTRO = '25'
+    YEAR = 2025
+    STATE_CODE_PB = '25'
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))    
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
     RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
     PROCESSED_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
     
-    COLUNAS_DESEJADAS = [
+    for directory in [RAW_DATA_DIR, PROCESSED_DATA_DIR]:
+        if not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+            logger.info(f"Directory created: {directory}")
+        
+    TARGET_COLUMNS = [
     'DT_NOTIFIC', 'DT_SIN_PRI', 'DT_OCORR', # Datas possíveis
     'ID_MUNICIP', 'ID_MUNICIP_NOTIFICACAO', # Local da Notificação
     'ID_UNIDADE', 'ID_UNIT',                # O Posto de Saúde (Crucial)
@@ -20,23 +26,37 @@ def main():
     'CLASSI_FIN', 'EVOLUCAO'                # Status
     ]
 
-    lista_doencas = obter_lista_doencas()
-    for sigla, nome in lista_doencas.items():
-        data = baixar_dados_brutos(sigla, ANO)
+    logger.info(f"Starting ETL process for year {YEAR}")
+
+    disease_list = get_disease_list()
+
+    for acronym, name in disease_list.items():
+        logger.info(f"Processing disease: {name} ({acronym})")
         
-        if data.empty:
-            print("  [Vazio] Nenhum dado retornado.")
-            continue
+        try:
+            raw_df = download_raw_data(acronym, YEAR)
+            
+            if raw_df.empty:
+                logger.warning(f"No data returned for {acronym} in {YEAR}")
+                continue
 
-        arquivo = os.path.join(RAW_DATA_DIR, f"{sigla}_{ANO}.csv")
-        data.to_csv(arquivo, sep=';', index=False)
+            raw_file_path = os.path.join(RAW_DATA_DIR, f"{acronym}_{YEAR}.csv")
+            raw_df.to_csv(raw_file_path, sep=';', index=False)
+            logger.debug(f"Raw data saved to {raw_file_path}")
 
-        df_pb = filtrar_estado_e_colunas(data, ESTADO_FILTRO, COLUNAS_DESEJADAS)
-        if not df_pb.empty:
-            arquivo = os.path.join(PROCESSED_DATA_DIR, f"{sigla}_{ANO}_PB.csv")
-            df_pb.to_csv(arquivo, sep=';', index=False)
-        else:
-            print("  [Info] Dados nacionais baixados, mas sem casos na PB.")
+            processed_df = filter_state_and_columns(raw_df, STATE_CODE_PB, TARGET_COLUMNS)
+            
+            if not processed_df.empty:
+                processed_file_path = os.path.join(PROCESSED_DATA_DIR, f"{acronym}_{YEAR}_PB.csv")
+                processed_df.to_csv(processed_file_path, sep=';', index=False)
+                logger.info(f"Successfully processed {len(processed_df)} cases for {acronym} in PB")
+            else:
+                logger.info(f"National data downloaded for {acronym}, but no cases found for PB")
+                
+        except Exception as e:
+            logger.error(f"Critical error processing {acronym}: {str(e)}")
+
+    logger.info("ETL process finished.")
 
 if __name__ == "__main__":
     main()
