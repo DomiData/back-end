@@ -21,6 +21,13 @@ def process_cnes_data(raw_csv_path, state_filter, target_columns):
         df_state = df[df['CO_MUNICIPIO_GESTOR'].str.startswith(str(state_filter))].copy()
         
         logger.info(f"Found {len(df_state)} health units in the target state.")
+
+        df_state['NU_LATITUDE'] = df_state['NU_LATITUDE'].astype(str).str.replace(',', '.')
+        df_state['NU_LONGITUDE'] = df_state['NU_LONGITUDE'].astype(str).str.replace(',', '.')
+        
+        df_state['NU_LATITUDE'] = pd.to_numeric(df_state['NU_LATITUDE'], errors='coerce')
+        df_state['NU_LONGITUDE'] = pd.to_numeric(df_state['NU_LONGITUDE'], errors='coerce')
+        
         df_final = df_state.dropna(subset=['NU_LATITUDE', 'NU_LONGITUDE'])
         logger.info(f"Processing complete. {len(df_final)} valid units ready for the map.")
         
