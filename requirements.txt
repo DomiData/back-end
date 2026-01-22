@@ -9,3 +9,4 @@ sqlalchemy
 pydantic-settings
 asyncpg
 colorlog
+python-dotenv
