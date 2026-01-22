@@ -2,6 +2,7 @@ from typing import Union
 from fastapi import FastAPI
 from app.core.database import create_db
 
+from app import model
 async def lifespan(app: FastAPI):
     await create_db()
     yield
