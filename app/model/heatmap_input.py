@@ -14,15 +14,15 @@ class Metric(str, Enum):
     COUNT = "count"
 
 class HeatmapFilters(BaseModel):
-    disease_acronym: Optional[str]
-    start_date: Optional[date]
-    end_date: Optional[date]
-    min_age: Optional[int]
-    max_age: Optional[int]
-    patient_sex: Optional[str]
-    evolution: Optional[str]
-    unit_type: Optional[str]
-    city_code: Optional[str]
+    disease_acronym: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    min_age: Optional[int] = None
+    max_age: Optional[int] = None
+    patient_sex: Optional[str] = None
+    evolution: Optional[str] = None
+    unit_type: Optional[str] = None
+    city_code: Optional[str] = None
 
 class HeatmapQueryInput(BaseModel):
     filters: HeatmapFilters

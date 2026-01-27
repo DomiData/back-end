@@ -22,12 +22,12 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+    
 
-
-@app.get("/heatmap")
-def heatmap(
-    params: HeatmapQueryInput = Depends(),
+@app.post("/heatmap")
+async def heatmap(
+    params: HeatmapQueryInput,
     session: Session = Depends(get_db)
 ):
     query_builder = HeatMapQueryBuilder(session)
-    return query_builder.build(params)
+    return await query_builder.build(params)
