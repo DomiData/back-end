@@ -1,12 +1,13 @@
 from typing import Union
-from fastapi import FastAPI
-
-from app.core.database import create_db, SessionLocal
+from fastapi import Depends, FastAPI
+from app.core.database import create_db, SessionLocal, get_db
 from app.core.config import settings
-
 from app.etl.main_etl import run_complete_etl
+from app.model.heatmap_input import HeatmapQueryInput
+from app.services.builder import HeatMapQueryBuilder
 from app.utils.logger import logger
-from app import model
+from sqlalchemy.orm import Session
+
 async def lifespan(app: FastAPI):
     await create_db()
     if settings.POPULATE_DB:
@@ -14,7 +15,6 @@ async def lifespan(app: FastAPI):
             logger.warning("Database populated with data!")
             await run_complete_etl(session)
     yield
-    # Shutdown code here
 
 app = FastAPI(lifespan=lifespan)
 
@@ -24,6 +24,10 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.get("/heatmap")
+def heatmap(
+    params: HeatmapQueryInput = Depends(),
+    session: Session = Depends(get_db)
+):
+    query_builder = HeatMapQueryBuilder(session)
+    return query_builder.build(params)
