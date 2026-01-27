@@ -42,3 +42,4 @@ sqlalchemy
 pydantic-settings
 asyncpg
 firebase-admin
+greenlet
