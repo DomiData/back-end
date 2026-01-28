@@ -9,3 +9,5 @@ sqlalchemy
 pydantic-settings
 asyncpg
 colorlog
+firebase-admin
+greenlet
