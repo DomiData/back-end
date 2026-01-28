@@ -28,6 +28,10 @@ def read_root():
 async def heatmap(
     params: HeatmapQueryInput,
     session: Session = Depends(get_db)
-):
+):  
+    print(f"Esse são os params: {params}")
+    print(session)
     query_builder = HeatMapQueryBuilder(session)
-    return await query_builder.build(params)
+    result = await query_builder.build(params)
+    print(f"Esse é o result {result}")
+    return result

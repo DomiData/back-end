@@ -17,7 +17,15 @@ class HeatMapQueryBuilder:
         self._apply_metric(params)
 
         result = await self.session.execute(self.stmt)
-        return result.all()
+        rows = result.all()
+
+        return [
+            {
+                "key": row[0],
+                "value": row[1]
+            }
+            for row in rows
+        ]
 
 
     def _join_disease(self):
@@ -124,7 +132,48 @@ class HeatMapQueryBuilder:
 
 
     def _apply_metric(self, params: HeatmapQueryInput):
-        if params.metric == Metric.COUNT:
+        if params.metric != Metric.COUNT:
+            return
+
+        gb = params.group_by
+
+        if gb == GroupBy.DATE:
+            self.stmt = self.stmt.with_only_columns(
+                Occurrence.notification_date.label("key"),
+                func.count(Occurrence.id).label("value")
+            )
+
+        elif gb == GroupBy.HEALTH_UNIT:
+            self.stmt = self.stmt.with_only_columns(
+                HealthUnit.cnes_code.label("key"),
+                HealthUnit.latitude,
+                HealthUnit.longitude,
+                func.count(Occurrence.id).label("value")
+            )
+
+        elif gb == GroupBy.DISTRICT:
+            self.stmt = self.stmt.with_only_columns(
+                HealthUnit.district.label("key"),
+                HealthUnit.latitude,
+                HealthUnit.longitude,
+                func.count(Occurrence.id).label("value")
+            )
+
+        elif gb == GroupBy.CITY:
+            self.stmt = self.stmt.with_only_columns(
+                HealthUnit.city_code.label("key"),
+                HealthUnit.latitude,
+                HealthUnit.longitude,
+                func.count(Occurrence.id).label("value")
+            )
+
+        elif gb == GroupBy.DISEASE:
+            self.stmt = self.stmt.with_only_columns(
+                Disease.acronym.label("key"),
+                func.count(Occurrence.id).label("value")
+            )
+
+        else:
             self.stmt = self.stmt.with_only_columns(
                 func.count(Occurrence.id).label("value")
             )
