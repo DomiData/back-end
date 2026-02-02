@@ -6,6 +6,8 @@ ENV_PATH = Path(__file__).resolve().parent.parent.parent / ".env"
 class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn
     FRONTEND_URL: str
+    POPULATE_DB: bool = False
+
 
     FIREBASE_CREDENTIALS_PATH: FilePath
     model_config = SettingsConfigDict(

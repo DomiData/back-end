@@ -17,15 +17,9 @@ def main():
             os.makedirs(directory, exist_ok=True)
             logger.info(f"Directory created: {directory}")
         
-    TARGET_COLUMNS = [
-    'DT_NOTIFIC', 'DT_SIN_PRI', 'DT_OCORR', # Datas possíveis
-    'ID_MUNICIP', 'ID_MUNICIP_NOTIFICACAO', # Local da Notificação
-    'ID_UNIDADE', 'ID_UNIT',                # O Posto de Saúde (Crucial)
-    'ID_MN_RESI',                           # Onde Mora
-    'NU_IDADE_N', 'CS_SEXO',                # Perfil
-    'CLASSI_FIN', 'EVOLUCAO'                # Status
-    ]
-
+    MANDATORY = ['DT_NOTIFIC', 'ID_UNIDADE', 'ID_MUNICIP'] # DATA, O Posot de Saúde, Município
+    OPTIONAL = ['NU_IDADE_N', 'CS_SEXO', 'EVOLUCAO']
+    
     logger.info(f"Starting ETL process for year {YEAR}")
 
     disease_list = get_disease_list()
@@ -44,15 +38,18 @@ def main():
             raw_df.to_csv(raw_file_path, sep=';', index=False)
             logger.debug(f"Raw data saved to {raw_file_path}")
 
-            processed_df = filter_state_and_columns(raw_df, STATE_CODE_PB, TARGET_COLUMNS)
+            processed_df = filter_state_and_columns(raw_df, STATE_CODE_PB, MANDATORY, OPTIONAL)
             
-            if not processed_df.empty:
-                processed_file_path = os.path.join(PROCESSED_DATA_DIR, f"{acronym}_{YEAR}_PB.csv")
-                processed_df.to_csv(processed_file_path, sep=';', index=False)
-                logger.info(f"Successfully processed {len(processed_df)} cases for {acronym} in PB")
-            else:
+            if processed_df.empty:
                 logger.info(f"National data downloaded for {acronym}, but no cases found for PB")
-                
+                continue
+            
+            processed_file_path = os.path.join(PROCESSED_DATA_DIR, f"{acronym}_{YEAR}_PB.csv")
+            processed_df.to_csv(processed_file_path, sep=';', index=False)
+            logger.info(f"Successfully processed {len(processed_df)} cases for {acronym} in PB")
+            
+            del raw_df
+            del processed_df
         except Exception as e:
             logger.error(f"Critical error processing {acronym}: {str(e)}")
 
