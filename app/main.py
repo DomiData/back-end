@@ -19,19 +19,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-    
-
 @app.post("/heatmap")
 async def heatmap(
     params: HeatmapQueryBuilderInput,
     session: Session = Depends(get_db)
 ):  
-    print(f"Esse são os params: {params}")
-    print(session)
     query_builder = HeatMapQueryBuilder(session)
     result = await query_builder.build(params)
-    print(f"Esse é o result {result}")
     return result
