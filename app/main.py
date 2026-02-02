@@ -3,7 +3,7 @@ from fastapi import Depends, FastAPI
 from app.core.database import create_db, SessionLocal, get_db
 from app.core.config import settings
 from app.etl.main_etl import run_complete_etl
-from app.model.heatmap_input import HeatmapQueryInput
+from app.model.heatmap_builder import HeatmapQueryBuilderInput
 from app.services.builder import HeatMapQueryBuilder
 from app.utils.logger import logger
 from sqlalchemy.orm import Session
@@ -26,7 +26,7 @@ def read_root():
 
 @app.post("/heatmap")
 async def heatmap(
-    params: HeatmapQueryInput,
+    params: HeatmapQueryBuilderInput,
     session: Session = Depends(get_db)
 ):  
     print(f"Esse são os params: {params}")

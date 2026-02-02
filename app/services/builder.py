@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.model import Occurrence, Disease, HealthUnit
-from app.model.heatmap_input import GroupBy, HeatmapQueryInput, Metric
+from app.model.heatmap_builder import GroupBy, HeatmapQueryBuilderInput, Metric, HeatmapBuilderOutput
 
 
 class HeatMapQueryBuilder:
@@ -12,7 +12,7 @@ class HeatMapQueryBuilder:
         self._joined = set()
         
 
-    async def build(self, params: HeatmapQueryInput):
+    async def build(self, params: HeatmapQueryBuilderInput):
         self._apply_filters(params)
         self._apply_group_by(params)
         self._apply_metric(params)
@@ -21,10 +21,11 @@ class HeatMapQueryBuilder:
         rows = result.all()
 
         return [
-            {
-                "key": row[0],
-                "value": row[1]
-            }
+            HeatmapBuilderOutput(
+                lat=row.lat,
+                lng=row.lng,
+                value=row.value
+            )
             for row in rows
         ]
 
@@ -41,7 +42,7 @@ class HeatMapQueryBuilder:
             self._joined.add("health_unit")
 
 
-    def _apply_filters(self, params: HeatmapQueryInput):
+    def _apply_filters(self, params: HeatmapQueryBuilderInput):
         f = params.filters
 
         if f.disease_acronym:
@@ -93,7 +94,7 @@ class HeatMapQueryBuilder:
             )
 
 
-    def _apply_group_by(self, params: HeatmapQueryInput):
+    def _apply_group_by(self, params: HeatmapQueryBuilderInput):
         gb = params.group_by
 
         if gb == GroupBy.HEALTH_UNIT:
@@ -121,32 +122,14 @@ class HeatMapQueryBuilder:
             )
 
 
-    def _apply_metric(self, params: HeatmapQueryInput):
+    def _apply_metric(self, params: HeatmapQueryBuilderInput):
         if params.metric != Metric.COUNT:
             return
 
-        gb = params.group_by
+        self._join_health_unit()
 
-        if gb == GroupBy.HEALTH_UNIT:
-            self.stmt = self.stmt.with_only_columns(
-                HealthUnit.cnes_code.label("key"),
-                HealthUnit.latitude,
-                HealthUnit.longitude,
-                func.count(Occurrence.id).label("value")
-            )
-
-        elif gb == GroupBy.DISTRICT:
-            self.stmt = self.stmt.with_only_columns(
-                HealthUnit.district.label("key"),
-                HealthUnit.latitude,
-                HealthUnit.longitude,
-                func.count(Occurrence.id).label("value")
-            )
-
-        elif gb == GroupBy.CITY:
-            self.stmt = self.stmt.with_only_columns(
-                HealthUnit.city_code.label("key"),
-                HealthUnit.latitude,
-                HealthUnit.longitude,
-                func.count(Occurrence.id).label("value")
-            )
+        self.stmt = self.stmt.with_only_columns(
+            HealthUnit.latitude.label("lat"),
+            HealthUnit.longitude.label("lng"),
+            func.count(Occurrence.id).label("value")
+        )

@@ -1,15 +1,8 @@
 from datetime import date
-from enum import Enum
-from pydantic import BaseModel
 from typing import Optional
+from pydantic import BaseModel
+from app.model.heatmap_builder.enums import GroupBy, Metric
 
-class GroupBy(str, Enum):
-    HEALTH_UNIT = "health_unit"
-    DISTRICT = "district"
-    CITY = "city"
-
-class Metric(str, Enum):
-    COUNT = "count"
 
 class HeatmapFilters(BaseModel):
     disease_acronym: Optional[str] = None
@@ -22,7 +15,8 @@ class HeatmapFilters(BaseModel):
     unit_type: Optional[str] = None
     city_code: Optional[str] = None
 
-class HeatmapQueryInput(BaseModel):
+
+class HeatmapQueryBuilderInput(BaseModel):
     filters: HeatmapFilters
     group_by: GroupBy
     metric: Metric = Metric.COUNT
