@@ -7,8 +7,6 @@ class GroupBy(str, Enum):
     HEALTH_UNIT = "health_unit"
     DISTRICT = "district"
     CITY = "city"
-    DISEASE = "disease"
-    DATE = "date"
 
 class Metric(str, Enum):
     COUNT = "count"

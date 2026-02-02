@@ -10,6 +10,7 @@ class HeatMapQueryBuilder:
         self.session = session
         self.stmt = select(Occurrence)
         self._joined = set()
+        
 
     async def build(self, params: HeatmapQueryInput):
         self._apply_filters(params)
@@ -119,17 +120,6 @@ class HeatMapQueryBuilder:
                 HealthUnit.longitude,
             )
 
-        elif gb == GroupBy.DISEASE:
-            self._join_disease()
-            self.stmt = self.stmt.group_by(
-                Disease.acronym
-            )
-
-        elif gb == GroupBy.DATE:
-            self.stmt = self.stmt.group_by(
-                Occurrence.notification_date
-            )
-
 
     def _apply_metric(self, params: HeatmapQueryInput):
         if params.metric != Metric.COUNT:
@@ -137,13 +127,7 @@ class HeatMapQueryBuilder:
 
         gb = params.group_by
 
-        if gb == GroupBy.DATE:
-            self.stmt = self.stmt.with_only_columns(
-                Occurrence.notification_date.label("key"),
-                func.count(Occurrence.id).label("value")
-            )
-
-        elif gb == GroupBy.HEALTH_UNIT:
+        if gb == GroupBy.HEALTH_UNIT:
             self.stmt = self.stmt.with_only_columns(
                 HealthUnit.cnes_code.label("key"),
                 HealthUnit.latitude,
@@ -164,16 +148,5 @@ class HeatMapQueryBuilder:
                 HealthUnit.city_code.label("key"),
                 HealthUnit.latitude,
                 HealthUnit.longitude,
-                func.count(Occurrence.id).label("value")
-            )
-
-        elif gb == GroupBy.DISEASE:
-            self.stmt = self.stmt.with_only_columns(
-                Disease.acronym.label("key"),
-                func.count(Occurrence.id).label("value")
-            )
-
-        else:
-            self.stmt = self.stmt.with_only_columns(
                 func.count(Occurrence.id).label("value")
             )
