@@ -1,5 +1,10 @@
 from typing import Union
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.database import create_db
+from app.core.firebase import initialize_firebase_app
+from app.core.config import settings
+from app.api.user import router as user_router
 from app.core.database import create_db, SessionLocal, get_db
 from app.core.config import settings
 from app.etl.main_etl import run_complete_etl
@@ -14,10 +19,26 @@ async def lifespan(app: FastAPI):
         async with SessionLocal() as session:
             logger.warning("Database populated with data!")
             await run_complete_etl(session)
+
+
+async def lifespan(app: FastAPI):
+    await create_db()
+    initialize_firebase_app()
     yield
 
-app = FastAPI(lifespan=lifespan)
+origins = [
+    settings.FRONTEND_URL
+]
 
+app = FastAPI(lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.include_router(user_router)
 
 @app.post("/heatmap")
 async def heatmap(
