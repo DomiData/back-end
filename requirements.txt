@@ -10,3 +10,4 @@ pydantic-settings
 asyncpg
 colorlog
 python-dotenv
+tqdm
