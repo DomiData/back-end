@@ -43,14 +43,3 @@ async def heatmap(
     query_builder = HeatMapQueryBuilder(session)
     result = await query_builder.build(params)
     return result
-
-@app.post("/heatmap/natural-search")
-async def natural_search(
-    request: NaturalSearchRequest,
-    session: AsyncSession = Depends(get_db),
-    parser: QueryIntentParser = Depends(get_query_intent_parser)
-):
-    params = parser.transform(natural_query=request.query)
-    query_builder = HeatMapQueryBuilder(session)
-    result = await query_builder.build(params)
-    return result
