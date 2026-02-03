@@ -6,6 +6,8 @@ from app.etl.etl_sinan import main as run_elt_sinan
 from app.etl.etl_cnes import main as run_elt_cnes
 from app.utils.logger import logger
 import os
+
+
 async def run_complete_etl(db: AsyncSession):
     logger.info("Starting LOAD ETL process")
 

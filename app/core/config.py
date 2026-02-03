@@ -1,7 +1,6 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import PostgresDsn
 from pathlib import Path
-
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import PostgresDsn, FilePath
 ENV_PATH = Path(__file__).resolve().parent.parent.parent / ".env"
 
 class Settings(BaseSettings):
@@ -9,9 +8,11 @@ class Settings(BaseSettings):
     FRONTEND_URL: str
     POPULATE_DB: bool = False
 
+
+    FIREBASE_CREDENTIALS_PATH: FilePath
     model_config = SettingsConfigDict(
         env_file=ENV_PATH,
         extra="ignore",
     )
 
-settings = Settings();
+settings = Settings() # type: ignore

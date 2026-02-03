@@ -11,3 +11,5 @@ asyncpg
 colorlog
 python-dotenv
 tqdm
+firebase-admin
+greenlet
