@@ -12,3 +12,6 @@ colorlog
 python-dotenv
 firebase-admin
 greenlet
+langchain
+langchain-openai
+langchain-google-genai
