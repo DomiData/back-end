@@ -7,8 +7,7 @@ class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn
     FRONTEND_URL: str
     POPULATE_DB: bool = False
-
-
+    GOOGLE_API_KEY: str
     FIREBASE_CREDENTIALS_PATH: FilePath
     model_config = SettingsConfigDict(
         env_file=ENV_PATH,
