@@ -11,8 +11,6 @@ from app.etl.main_etl import run_complete_etl
 from app.model.heatmap_builder import HeatmapQueryBuilderInput
 from app.services.builder import HeatMapQueryBuilder
 from app.utils.logger import logger
-from app.schema.requests import NaturalSearchRequest
-from app.services.parser import QueryIntentParser, get_query_intent_parser
 
 async def lifespan(app: FastAPI):
     await create_db()
