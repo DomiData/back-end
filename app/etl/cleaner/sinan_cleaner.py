@@ -11,6 +11,24 @@ def clean_sinan_age(age_raw):
         return 0
         
 
+def calcular_dv_ibge(codigo_6):
+    codigo = str(codigo_6)
+    if len(codigo) != 6:
+        return None
+
+    pesos = [1, 2, 1, 2, 1, 2]
+    soma = 0
+
+    for i in range(6):
+        mult = int(codigo[i]) * pesos[i]
+        soma += mult if mult <= 9 else (mult - 9)
+
+    resto = soma % 10
+    dv = (10 - resto) % 10
+    
+    return f"{codigo}{dv}"
+
+
 def filter_state_and_columns(df_national, state_code, mandatory_cols, optional_cols):
     if df_national.empty:
         logger.warning("Cleaner received an empty DataFrame. Skipping filtration.")
@@ -47,6 +65,8 @@ def filter_state_and_columns(df_national, state_code, mandatory_cols, optional_c
     
     logger.debug("Formatting patient age (SINAN pattern)...")
     df_state['NU_IDADE_N'] = df_state['NU_IDADE_N'].apply(clean_sinan_age)
+    df_state['ID_MUNICIP'] = df_state['ID_MUNICIP'].apply(calcular_dv_ibge)
+    
     logger.info(f"Successfully filtered {len(df_state)} records for the target state.")
     
     return df_state
