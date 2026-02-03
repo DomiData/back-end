@@ -11,6 +11,8 @@ from app.etl.main_etl import run_complete_etl
 from app.model.heatmap_builder import HeatmapQueryBuilderInput
 from app.services.builder import HeatMapQueryBuilder
 from app.utils.logger import logger
+from app.schema.requests import NaturalSearchRequest
+from app.services.parser import QueryIntentParser, get_query_intent_parser
 
 async def lifespan(app: FastAPI):
     await create_db()
@@ -40,6 +42,21 @@ async def heatmap(
     params: HeatmapQueryBuilderInput,
     session: Session = Depends(get_db)
 ):
+    query_builder = HeatMapQueryBuilder(session)
+    result = await query_builder.build(params)
+    print(result)
+    return result
+
+@app.post("/heatmap/natural-search")
+async def natural_search(
+    request: NaturalSearchRequest,
+    session: AsyncSession = Depends(get_db),
+    parser: QueryIntentParser = Depends(get_query_intent_parser)
+):
+    params = await parser.transform(natural_query=request.query)
+    print("----------------------------")
+    print(params)
+    print("----------------------------")
     query_builder = HeatMapQueryBuilder(session)
     result = await query_builder.build(params)
     return result
