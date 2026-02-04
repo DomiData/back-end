@@ -2,7 +2,7 @@ pysus
 pandas
 requests
 fastapi
-pydantic
+pydantic[email]
 urllib3
 uvicorn
 sqlalchemy

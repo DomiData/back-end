@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:15
+    container_name: domidata-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -9,10 +10,38 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-  # web:
-  #   build: .
-  #   command: uvicorn app.main:app --host
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - domidata-network
 
+  api:
+    build: .
+    container_name: domidata-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - POPULATE_DB=${POPULATE_DB}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - FIREBASE_CREDENTIALS_PATH=/app/domidata-d1fbf-firebase-adminsdk-fbsvc-c5ace18e75.json
+    volumes:
+      - ./data:/app/data
+      - ./domidata-d1fbf-firebase-adminsdk-fbsvc-c5ace18e75.json:/app/domidata-d1fbf-firebase-adminsdk-fbsvc-c5ace18e75.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - domidata-network
+    restart: unless-stopped
 
 volumes:
   db_data:
+
+networks:
+  domidata-network:
+    driver: bridge
