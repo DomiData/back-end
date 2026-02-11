@@ -10,8 +10,8 @@ async def load_cnes_csv(db: AsyncSession, csv_path: str):
         csv_path,
         sep=';',
         dtype={
-        'CO_CNES': str, 
-        'CO_MUNICIPIO_GESTOR': str, 
+        'CO_CNES': str,
+        'CO_MUNICIPIO_GESTOR': str,
         'TP_UNIDADE': str
         }
     ).fillna('')
@@ -19,14 +19,14 @@ async def load_cnes_csv(db: AsyncSession, csv_path: str):
         try:
             cnes_code = row['CO_CNES'].zfill(7)
             query = select(HealthUnit).where(HealthUnit.cnes_code == cnes_code)
-            
+
             health_unit = await db.execute(query)
             exists = health_unit.scalar_one_or_none()
-            if exists: 
+            if exists:
                 continue
 
             logger.debug(f"Adding new Health Unit: {row['NO_FANTASIA']} ({cnes_code})")
-            
+
             new_unit = HealthUnit(
                 cnes_code=cnes_code,
                 name=row['NO_FANTASIA'],
@@ -36,11 +36,10 @@ async def load_cnes_csv(db: AsyncSession, csv_path: str):
                 latitude=row['NU_LATITUDE'],
                 longitude=row['NU_LONGITUDE']
             )
-            db.add(new_unit)        
+            db.add(new_unit)
         except Exception as e:
             logger.error(f"Failed to load CNES data in {ind}: {str(e)} ")
             continue
-    
+
     await db.commit()
-    logger.info(f"CNES load finished.")
-    
+    logger.info("CNES load finished.")

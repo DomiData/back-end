@@ -6,12 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.model.occurrence import Occurrence
 from app.model.health_unit import HealthUnit
 from app.utils.logger import logger
-from datetime import datetime
 
 async def load_sinan_occurrences(db: AsyncSession, processed_dir: str):
-    logger.info(f"Scanning directory for SINAN data")
+    logger.info("Scanning directory for SINAN data")
     csv_files = glob.glob(os.path.join(processed_dir, "*.csv"))
-    
+
     query = await db.execute(select(HealthUnit.cnes_code))
     valid_cnes = set(query.scalars().all())
 
@@ -22,7 +21,7 @@ async def load_sinan_occurrences(db: AsyncSession, processed_dir: str):
     for file_path in csv_files:
         file_name = os.path.basename(file_path)
         disease_acronym = file_name.split('_')[0]
-        
+
         logger.info(f"Processing file: {file_name} for disease: {disease_acronym}")
         df = pd.read_csv(
             file_path,
@@ -33,7 +32,7 @@ async def load_sinan_occurrences(db: AsyncSession, processed_dir: str):
                 'EVOLUCAO': str
             }
         ).fillna('')
-        
+
         for ind, row in df.iterrows():
             try:
                 cnes_id = str(row['ID_UNIDADE']).zfill(7)
@@ -51,10 +50,10 @@ async def load_sinan_occurrences(db: AsyncSession, processed_dir: str):
                     patient_sex=row['CS_SEXO'],
                 )
                 db.add(occurrence)
-        
+
             except Exception as e:
                 logger.error(f"Failed to process {ind} in {file_name}: {str(e)}")
                 continue
-        
+
         await db.commit()
         logger.info(f"Successfully loaded occurrences from {file_name}")

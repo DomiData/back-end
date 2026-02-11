@@ -6,14 +6,14 @@ from app.etl.downloader.sinan_downloader import get_disease_list
 
 async def seed_diseases(db: AsyncSession):
     logger.info("Starting SINAN disease metadata seed")
-    
+
     try:
         sinan_diseases = get_disease_list()
-        
+
         if not sinan_diseases:
             logger.error("Failed to fetch disease list from SINAN metadata")
             return
-        
+
         for acronym, name in sinan_diseases.items():
             query = select(Disease).where(Disease.acronym == acronym)
             disease = await db.execute(query)
@@ -23,10 +23,10 @@ async def seed_diseases(db: AsyncSession):
                 logger.debug(f"Registering new disease: {acronym} - {name}")
                 disease = Disease(acronym=acronym, name=name)
                 db.add(disease)
-        
+
         await db.commit()
-        logger.info(f"Disease seed completed successfully.")
-        
+        logger.info("Disease seed completed successfully.")
+
     except Exception as e:
         logger.error(f"Unexpected error during disease seeding: {str(e)}")
         await db.rollback()
