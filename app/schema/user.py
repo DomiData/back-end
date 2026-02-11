@@ -1,12 +1,15 @@
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, ConfigDict
 
+
 class UserBase(BaseModel):
     email: EmailStr
     firebase_uid: str
 
+
 class UserCreate(UserBase):
     pass
+
 
 class UserResponse(UserBase):
     id: UUID

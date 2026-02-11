@@ -2,6 +2,7 @@ from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
+
 class Disease(Base):
     __tablename__ = "diseases"
 

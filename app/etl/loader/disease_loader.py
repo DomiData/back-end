@@ -4,6 +4,7 @@ from app.model.disease import Disease
 from app.utils.logger import logger
 from app.etl.downloader.sinan_downloader import get_disease_list
 
+
 async def seed_diseases(db: AsyncSession):
     logger.info("Starting SINAN disease metadata seed")
 

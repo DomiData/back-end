@@ -13,9 +13,11 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 
+
 async def get_db():
     async with SessionLocal() as db:
         yield db
+
 
 async def create_db():
     async with engine.begin() as conn:

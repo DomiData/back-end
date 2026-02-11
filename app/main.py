@@ -14,6 +14,7 @@ from app.utils.logger import logger
 from app.schema.requests import NaturalSearchRequest
 from app.services.parser import QueryIntentParser, get_query_intent_parser
 
+
 async def lifespan(app: FastAPI):
     await create_db()
     initialize_firebase_app()
@@ -23,9 +24,8 @@ async def lifespan(app: FastAPI):
             await run_complete_etl(session)
     yield
 
-origins = [
-    settings.FRONTEND_URL
-]
+
+origins = [settings.FRONTEND_URL]
 
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
@@ -37,20 +37,19 @@ app.add_middleware(
 )
 app.include_router(user_router)
 
+
 @app.post("/heatmap")
-async def heatmap(
-    params: HeatmapQueryBuilderInput,
-    session: Session = Depends(get_db)
-):
+async def heatmap(params: HeatmapQueryBuilderInput, session: Session = Depends(get_db)):
     query_builder = HeatMapQueryBuilder(session)
     result = await query_builder.build(params)
     return result
+
 
 @app.post("/heatmap/natural-search")
 async def natural_search(
     request: NaturalSearchRequest,
     session: AsyncSession = Depends(get_db),
-    parser: QueryIntentParser = Depends(get_query_intent_parser)
+    parser: QueryIntentParser = Depends(get_query_intent_parser),
 ):
     params = await parser.transform(natural_query=request.query)
     query_builder = HeatMapQueryBuilder(session)

@@ -1,10 +1,11 @@
 import pandas as pd
 from app.utils.logger import logger
 
+
 def clean_sinan_age(age_raw):
     try:
         age_str = str(int(float(age_raw))).zfill(4)
-        if age_str.startswith('4'):
+        if age_str.startswith("4"):
             return int(age_str[1:])
         return 0
     except (ValueError, TypeError):
@@ -35,11 +36,13 @@ def filter_state_and_columns(df_national, state_code, mandatory_cols, optional_c
         return pd.DataFrame()
 
     mapping = {
-        'ID_UNIT': 'ID_UNIDADE',
-        'ID_MUNICIP_NOTIFICACAO': 'ID_MUNICIP',
-        'DT_NOTIFICACAO': 'DT_NOTIFIC'
+        "ID_UNIT": "ID_UNIDADE",
+        "ID_MUNICIP_NOTIFICACAO": "ID_MUNICIP",
+        "DT_NOTIFICACAO": "DT_NOTIFIC",
     }
-    df_national = df_national.rename(columns={k: v for k, v in mapping.items() if k in df_national.columns})
+    df_national = df_national.rename(
+        columns={k: v for k, v in mapping.items() if k in df_national.columns}
+    )
 
     missing_mandatory = [c for c in mandatory_cols if c not in df_national.columns]
 
@@ -56,16 +59,20 @@ def filter_state_and_columns(df_national, state_code, mandatory_cols, optional_c
             df_filtered[col] = None
 
     logger.info(f"Filtering data for State Code: {state_code} using column: ID_MUNICIP")
-    df_filtered['ID_MUNICIP'] = df_filtered['ID_MUNICIP'].astype(str)
-    df_state = df_filtered[df_filtered['ID_MUNICIP'].str.startswith(str(state_code))].copy()
+    df_filtered["ID_MUNICIP"] = df_filtered["ID_MUNICIP"].astype(str)
+    df_state = df_filtered[
+        df_filtered["ID_MUNICIP"].str.startswith(str(state_code))
+    ].copy()
 
     if df_state.empty:
-        logger.warning(f"Filtration complete, but no records found for state {state_code}.")
+        logger.warning(
+            f"Filtration complete, but no records found for state {state_code}."
+        )
         return pd.DataFrame()
 
     logger.debug("Formatting patient age (SINAN pattern)...")
-    df_state['NU_IDADE_N'] = df_state['NU_IDADE_N'].apply(clean_sinan_age)
-    df_state['ID_MUNICIP'] = df_state['ID_MUNICIP'].apply(calcular_dv_ibge)
+    df_state["NU_IDADE_N"] = df_state["NU_IDADE_N"].apply(clean_sinan_age)
+    df_state["ID_MUNICIP"] = df_state["ID_MUNICIP"].apply(calcular_dv_ibge)
 
     logger.info(f"Successfully filtered {len(df_state)} records for the target state.")
 

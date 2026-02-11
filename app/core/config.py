@@ -1,7 +1,9 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import PostgresDsn, FilePath
+
 ENV_PATH = Path(__file__).resolve().parent.parent.parent / ".env"
+
 
 class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn
@@ -14,4 +16,5 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-settings = Settings() # type: ignore
+
+settings = Settings()  # type: ignore

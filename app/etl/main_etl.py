@@ -16,7 +16,7 @@ async def run_complete_etl(db: AsyncSession):
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
-    
+
     CNES_CSV_FILE = os.path.join(PROJECT_ROOT, "cnes", "CNES_PB_MAP.csv")
     SINAN_PROCESSED_DIR = os.path.join(PROJECT_ROOT, "data", "processed")
 

@@ -7,8 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def get_current_user(
-    claims: dict = Depends(get_firebase_claims),
-    db: AsyncSession = Depends(get_db)
+    claims: dict = Depends(get_firebase_claims), db: AsyncSession = Depends(get_db)
 ) -> User:
     email = claims.get("email")
     if not email:

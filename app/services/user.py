@@ -3,8 +3,8 @@ from app.schema.user import UserCreate, UserResponse
 from app.model.user import User
 from app.repository.user import UserRepository
 
-class UserService:
 
+class UserService:
     @staticmethod
     async def sync(db: AsyncSession, dto: UserCreate) -> User:
         user = await UserRepository.get_by_email(session=db, email=dto.email)

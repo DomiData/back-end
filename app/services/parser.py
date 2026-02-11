@@ -86,27 +86,30 @@ Considere HOJE = 2026-05-20 para os exemplos abaixo:
 }}
 """
 
+
 class QueryIntentParser:
     def __init__(self):
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-3-flash-preview",
             temperature=0,
             google_api_key=settings.GOOGLE_API_KEY,
-            convert_system_message_to_human=True
+            convert_system_message_to_human=True,
         )
         self.structured_llm = self.llm.with_structured_output(HeatmapQueryBuilderInput)
-        self.prompt = ChatPromptTemplate.from_messages([
-            ("system", SYSTEM_PROMPT),
-            ("human", "{text}"),
-        ])
+        self.prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", SYSTEM_PROMPT),
+                ("human", "{text}"),
+            ]
+        )
         self.chain = self.prompt | self.structured_llm
 
     async def transform(self, natural_query: str) -> HeatmapQueryBuilderInput:
         current_date = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%Y-%m-%d")
-        return await self.chain.ainvoke({
-                "text": natural_query,
-                "current_date": current_date
-        })
+        return await self.chain.ainvoke(
+            {"text": natural_query, "current_date": current_date}
+        )
+
 
 @lru_cache()
 def get_query_intent_parser() -> QueryIntentParser:
