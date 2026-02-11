@@ -5,7 +5,7 @@ from app.model.health_unit import HealthUnit
 from app.utils.logger import logger
 
 async def load_cnes_csv(db: AsyncSession, csv_path: str):
-    logger.info(f"Starting CNES data load")
+    logger.info("Starting CNES data load")
     df_cnes = pd.read_csv(
         csv_path,
         sep=';',
