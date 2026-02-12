@@ -1,11 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DiseaseBase(BaseModel):
-    acronym: str = Field(..., min_length=2, max_length=10, example="DENG")
-    name: str = Field(..., min_length=3, max_length=100, example="Dengue")
+    acronym: str = Field(..., min_length=2, max_length=10, examples=["DENG"])
+    name: str = Field(..., min_length=3, max_length=100, examples=["Dengue"])
 
 
 class DiseaseResponse(DiseaseBase):
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
