@@ -1,4 +1,4 @@
-import firebase_admin # type: ignore
+import firebase_admin  # type: ignore
 from firebase_admin import credentials, auth
 from .config import settings
 
