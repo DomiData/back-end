@@ -1,18 +1,19 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from .config import settings
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
+from app.core.config import settings
+from app.utils.logger import logger
 
 engine = create_async_engine(str(settings.DATABASE_URL))
-SessionLocal = sessionmaker(
+SessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     autocommit=False,
     autoflush=False,
+    expire_on_commit=False,
 )
 
-Base = declarative_base()
-
+class Base(DeclarativeBase):
+    pass
 
 async def get_db():
     async with SessionLocal() as db:
@@ -22,4 +23,4 @@ async def get_db():
 async def create_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    print("Database tables created.")
+    logger.info("Database connected and tables created.")
