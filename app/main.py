@@ -1,7 +1,6 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from app.core.database import create_db, SessionLocal, get_db
 from app.core.firebase import initialize_firebase_app
