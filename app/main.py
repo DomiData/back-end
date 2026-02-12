@@ -39,7 +39,9 @@ app.include_router(user_router)
 
 
 @app.post("/heatmap")
-async def heatmap(params: HeatmapQueryBuilderInput, session: Session = Depends(get_db)):
+async def heatmap(
+    params: HeatmapQueryBuilderInput, session: AsyncSession = Depends(get_db)
+):
     query_builder = HeatMapQueryBuilder(session)
     result = await query_builder.build(params)
     return result
