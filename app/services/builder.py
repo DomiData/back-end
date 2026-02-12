@@ -1,5 +1,6 @@
+from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import Select, select, func
 from app.model import Occurrence, Disease, HealthUnit
 from app.model.heatmap_builder import (
     GroupBy,
@@ -12,8 +13,8 @@ from app.model.heatmap_builder import (
 class HeatMapQueryBuilder:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.stmt = select(Occurrence)
-        self._joined = set()
+        self.stmt: Select[Any] = select(Occurrence)
+        self._joined: set[str] = set()
 
     async def build(self, params: HeatmapQueryBuilderInput):
         self._apply_filters(params)
