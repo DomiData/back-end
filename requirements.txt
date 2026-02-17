@@ -1,4 +1,5 @@
 pysus
+email-validator
 pandas
 requests
 fastapi
