@@ -1,5 +1,5 @@
-from pysus.online_data.SINAN import download
-from pysus.ftp.databases.sinan import SINAN
+from pysus.online_data.SINAN import download  # type: ignore
+from pysus.ftp.databases.sinan import SINAN  # type: ignore
 import pandas as pd
 from app.utils.logger import logger
 

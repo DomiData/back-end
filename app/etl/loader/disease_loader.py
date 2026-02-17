@@ -17,8 +17,8 @@ async def seed_diseases(db: AsyncSession):
 
         for acronym, name in sinan_diseases.items():
             query = select(Disease).where(Disease.acronym == acronym)
-            disease = await db.execute(query)
-            db_disease = disease.scalar_one_or_none()
+            result = await db.execute(query)
+            db_disease = result.scalar_one_or_none()
 
             if not db_disease:
                 logger.debug(f"Registering new disease: {acronym} - {name}")

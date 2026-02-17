@@ -37,4 +37,4 @@ jobs:
       - name: Security Scan (Bandit & Audit)
         run: |
           bandit -r app/ -c pyproject.toml   # Scan no código
-          pip-audit                          # Scan nas dependências
+          pip-audit -r requirements.txt      # Scan nas dependências
