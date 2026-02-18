@@ -11,6 +11,7 @@ asyncpg
 colorlog
 python-dotenv
 tqdm
+cryptography>=46.0.5
 firebase-admin
 greenlet
 langchain>=0.3
