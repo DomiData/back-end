@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo
 from functools import lru_cache
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
-from app.model.heatmap_builder.input import HeatmapQueryBuilderInput
+from app.model.builder.heatmap_input import HeatmapBuilderInput
 from app.core.config import settings
 
 SYSTEM_PROMPT = """
@@ -95,7 +95,7 @@ class QueryIntentParser:
             google_api_key=settings.GOOGLE_API_KEY,
             convert_system_message_to_human=True,
         )
-        self.structured_llm = self.llm.with_structured_output(HeatmapQueryBuilderInput)
+        self.structured_llm = self.llm.with_structured_output(HeatmapBuilderInput)
         self.prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", SYSTEM_PROMPT),
@@ -104,7 +104,7 @@ class QueryIntentParser:
         )
         self.chain = self.prompt | self.structured_llm
 
-    async def transform(self, natural_query: str) -> HeatmapQueryBuilderInput:
+    async def transform(self, natural_query: str) -> HeatmapBuilderInput:
         current_date = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%Y-%m-%d")
         return await self.chain.ainvoke(
             {"text": natural_query, "current_date": current_date}
