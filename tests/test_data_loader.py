@@ -1,5 +1,3 @@
-import pytest
-
 from app.services.chat.data_loader import (
     get_seasonality_summary,
     list_available_diseases,

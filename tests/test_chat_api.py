@@ -3,6 +3,7 @@
 These tests require mocking the app infrastructure (Firebase, DB, Settings)
 since we're testing in isolation without the full environment.
 """
+import os
 import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -16,20 +17,19 @@ sys.modules.setdefault("firebase_admin.credentials", MagicMock())
 sys.modules.setdefault("asyncpg", MagicMock())
 
 # Set env vars before Settings is imported
-import os
 os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://user:pass@localhost:5432/test")
 os.environ.setdefault("FRONTEND_URL", "http://localhost:3000")
 os.environ.setdefault("FIREBASE_CREDENTIALS_PATH", __file__)
 os.environ.setdefault("OPENAI_API_KEY", "test-key")
 
 # Now we can safely import app modules
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
+from fastapi import FastAPI  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
 
-from app.core.security import get_firebase_claims
-from app.api.chat import router as chat_router
-from app.schema.chat import ChatMessageResponse, SourceReference
-from app.services.chat.prompts import DISCLAIMER_PT
+from app.core.security import get_firebase_claims  # noqa: E402
+from app.api.chat import router as chat_router  # noqa: E402
+from app.schema.chat import ChatMessageResponse, SourceReference  # noqa: E402
+from app.services.chat.prompts import DISCLAIMER_PT  # noqa: E402
 
 
 def _create_test_app() -> FastAPI:
