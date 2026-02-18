@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
 
@@ -80,7 +81,9 @@ def load_time_series(disease_name: str, data_dir: str) -> dict:
     total_cases = int(df["cases"].sum())
     mean_cases = round(float(df["cases"].mean()), 1)
     max_cases = int(df["cases"].max())
-    max_date = df.loc[df["cases"].idxmax(), "date"].strftime("%Y-%m")
+    max_date = cast(pd.Timestamp, df.loc[df["cases"].idxmax(), "date"]).strftime(
+        "%Y-%m"
+    )
     min_cases = int(df["cases"].min())
     date_range_start = df["date"].min().strftime("%Y-%m")
     date_range_end = df["date"].max().strftime("%Y-%m")
@@ -207,28 +210,41 @@ def get_seasonality_summary(disease_name: str, data_dir: str) -> dict:
     df = pd.read_csv(csv_path, parse_dates=["date"])
 
     month_names_pt = {
-        1: "Janeiro", 2: "Fevereiro", 3: "Marco", 4: "Abril",
-        5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
-        9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro",
+        1: "Janeiro",
+        2: "Fevereiro",
+        3: "Marco",
+        4: "Abril",
+        5: "Maio",
+        6: "Junho",
+        7: "Julho",
+        8: "Agosto",
+        9: "Setembro",
+        10: "Outubro",
+        11: "Novembro",
+        12: "Dezembro",
     }
 
     monthly_avg = df.groupby("month")["cases"].mean().round(1)
     monthly_data = [
-        {"month": int(m), "month_name": month_names_pt[int(m)], "avg_cases": float(v)}
+        {
+            "month": cast(int, m),
+            "month_name": month_names_pt[cast(int, m)],
+            "avg_cases": float(v),
+        }
         for m, v in monthly_avg.items()
     ]
 
     # Identify peak and low months
-    peak_month = monthly_avg.idxmax()
-    low_month = monthly_avg.idxmin()
+    peak_month = cast(int, monthly_avg.idxmax())
+    low_month = cast(int, monthly_avg.idxmin())
 
     # High season: months with above-average cases
     overall_avg = monthly_avg.mean()
     high_season_months = [
-        month_names_pt[int(m)] for m, v in monthly_avg.items() if v > overall_avg
+        month_names_pt[cast(int, m)] for m, v in monthly_avg.items() if v > overall_avg
     ]
     low_season_months = [
-        month_names_pt[int(m)] for m, v in monthly_avg.items() if v <= overall_avg
+        month_names_pt[cast(int, m)] for m, v in monthly_avg.items() if v <= overall_avg
     ]
 
     return {
@@ -236,9 +252,9 @@ def get_seasonality_summary(disease_name: str, data_dir: str) -> dict:
         "disease": disease_name,
         "disease_code": code,
         "monthly_averages": monthly_data,
-        "peak_month": month_names_pt[int(peak_month)],
+        "peak_month": month_names_pt[peak_month],
         "peak_month_avg_cases": round(float(monthly_avg[peak_month]), 1),
-        "low_month": month_names_pt[int(low_month)],
+        "low_month": month_names_pt[low_month],
         "low_month_avg_cases": round(float(monthly_avg[low_month]), 1),
         "high_season": high_season_months,
         "low_season": low_season_months,

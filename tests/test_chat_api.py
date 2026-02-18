@@ -3,6 +3,7 @@
 These tests require mocking the app infrastructure (Firebase, DB, Settings)
 since we're testing in isolation without the full environment.
 """
+
 import os
 import sys
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -17,7 +18,9 @@ sys.modules.setdefault("firebase_admin.credentials", MagicMock())
 sys.modules.setdefault("asyncpg", MagicMock())
 
 # Set env vars before Settings is imported
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://user:pass@localhost:5432/test")
+os.environ.setdefault(
+    "DATABASE_URL", "postgresql+asyncpg://user:pass@localhost:5432/test"
+)
 os.environ.setdefault("FRONTEND_URL", "http://localhost:3000")
 os.environ.setdefault("FIREBASE_CREDENTIALS_PATH", __file__)
 os.environ.setdefault("OPENAI_API_KEY", "test-key")
@@ -58,9 +61,10 @@ def client(mock_response):
         "email": "test@example.com",
     }
 
-    with patch("app.api.chat.run_agent", new_callable=AsyncMock) as mock_run, \
-         patch("app.api.chat._get_agent") as mock_get:
-
+    with (
+        patch("app.api.chat.run_agent", new_callable=AsyncMock) as mock_run,
+        patch("app.api.chat._get_agent") as mock_get,
+    ):
         mock_get.return_value = MagicMock()
         mock_run.return_value = mock_response
 

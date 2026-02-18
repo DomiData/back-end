@@ -4,6 +4,7 @@ import logging
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
+from pydantic import SecretStr
 
 from app.schema.chat import ChatMessageResponse, SourceReference
 from app.services.chat.prompts import DISCLAIMER_PT, SYSTEM_PROMPT
@@ -19,7 +20,7 @@ def create_chat_agent(openai_api_key: str, data_dir: str):
     llm = ChatOpenAI(
         model="gpt-4o",
         temperature=0.3,
-        api_key=openai_api_key,
+        api_key=SecretStr(openai_api_key),
     )
 
     agent = create_react_agent(
@@ -54,17 +55,19 @@ def _extract_sources_from_messages(messages: list) -> list[SourceReference]:
             sources.append(SourceReference(type=source_type, detail=detail))
 
     if not sources:
-        sources.append(SourceReference(
-            type="general_knowledge",
-            detail="Conhecimento geral do modelo",
-        ))
+        sources.append(
+            SourceReference(
+                type="general_knowledge",
+                detail="Conhecimento geral do modelo",
+            )
+        )
 
     return sources
 
 
 def _build_message_history(chat_history: list) -> list:
     """Convert tuple-based chat history to LangChain message objects."""
-    messages = []
+    messages: list[HumanMessage | AIMessage] = []
     for role, content in chat_history:
         if role == "human":
             messages.append(HumanMessage(content=content))
@@ -91,7 +94,9 @@ async def run_agent(
         answer = "Desculpe, nao consegui processar sua pergunta."
         for msg in reversed(response_messages):
             if isinstance(msg, AIMessage) and msg.content:
-                answer = msg.content
+                answer = (
+                    msg.content if isinstance(msg.content, str) else str(msg.content)
+                )
                 break
 
         sources = _extract_sources_from_messages(response_messages)

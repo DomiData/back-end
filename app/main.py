@@ -14,6 +14,7 @@ from app.utils.logger import logger
 from app.schema.requests import NaturalSearchRequest
 from app.services.parser import QueryIntentParser, get_query_intent_parser
 
+
 async def lifespan(app: FastAPI):
     await create_db()
     initialize_firebase_app()
