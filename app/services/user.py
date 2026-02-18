@@ -1,11 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schema.user import UserCreate, UserResponse
+from app.schema.user import UserCreate
 from app.model.user import User
 from app.repository.user import UserRepository
-import uuid
+
 
 class UserService:
-
     @staticmethod
     async def sync(db: AsyncSession, dto: UserCreate) -> User:
         user = await UserRepository.get_by_email(session=db, email=dto.email)
@@ -17,8 +16,8 @@ class UserService:
         return user
 
     @staticmethod
-    async def get_user_by_email(db: AsyncSession, email: str) -> UserResponse:
+    async def get_user_by_email(db: AsyncSession, email: str) -> User:
         user = await UserRepository.get_by_email(session=db, email=email)
         if not user:
-            raise Exception("user not found")
-        return UserResponse.model_validate(user)
+            raise ValueError("user not found")
+        return user

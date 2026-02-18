@@ -4,6 +4,7 @@ from .firebase import verify_token
 
 security = HTTPBearer()
 
+
 def get_firebase_claims(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:

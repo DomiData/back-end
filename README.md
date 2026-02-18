@@ -9,11 +9,25 @@ Siga os passos abaixo para rodar a aplicação localmente.
 ### 1. Configuração de Ambiente (.env)
 Crie um arquivo `.env` na raiz do projeto e preencha as variáveis necessárias.
 
-### 2. Ambiente Virtual e Dependências
+### 2. Setup Firebase
+
+Após gerar a **Service Account** no console do Firebase, você terá um arquivo `.json`.
+Coloque esse arquivo **no mesmo diretório onde está o `.env`** do projeto.
+```
+    /project-root
+    ├── .env
+    ├── firebase-credentials.json
+    ├── app/
+```
+
+Após isso, nas variáveis de ambiente, coloque o path exato para o arquivo:
+`FIREBASE_CREDENTIALS_PATH=./firebase-credentials.json`
+
+### 3. Ambiente Virtual e Dependências
 
 Crie e ative o ambiente virtual, e depois instale as dependências:
 
-```bash
+```
 # Criar o ambiente virtual
 python -m venv venv
 
@@ -27,7 +41,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ````
 
-### 3\. Banco de Dados (Docker)
+###  4. Banco de Dados (Docker)
 
 Suba o container do banco de dados (e outros serviços) em segundo plano:
 
@@ -35,11 +49,11 @@ Suba o container do banco de dados (e outros serviços) em segundo plano:
 docker compose up -d
 ```
 
-### 4\. Rodar a Aplicação
+### 5. Rodar a Aplicação
 
 Inicie o servidor de desenvolvimento:
 
-```bash
+```
 uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
 ```
 
