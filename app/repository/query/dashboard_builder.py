@@ -1,8 +1,8 @@
 from sqlalchemy import func
 from app.model import Occurrence, Disease, HealthUnit
 from app.model.builder import (
-    GroupBy,
-    Metric,
+    DashboardGroupBy as GroupBy,
+    DashboardMetric as Metric,
     DashboardBuilderOutput,
 )
 from app.model.builder.dashboard_input import DashboardBuilderInput

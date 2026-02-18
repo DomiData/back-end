@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.model import Occurrence, HealthUnit
 from app.model.builder import (
-    GroupBy,
-    Metric,
+    HeatmapGroupBy as GroupBy,
+    HeatmapMetric as Metric,
     HeatmapBuilderOutput,
 )
 from app.model.builder.heatmap_input import HeatmapBuilderInput
