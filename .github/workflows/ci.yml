@@ -40,9 +40,12 @@ jobs:
           bandit -r app/ -c pyproject.toml
           # urllib3 CVEs: blocked by pysus -> elasticsearch<8 -> urllib3<2 constraint
           # tqdm CVE-2024-34062: blocked by pysus 1.0.0 hard pin tqdm==4.64.0
+          # cryptography CVE-2026-26007: fix requires >=46.0.5 which needs cffi>=2.0.0,
+          #   blocked by pysus -> pyreaddbc -> cffi<2 constraint
           pip-audit -r requirements.txt \
             --ignore-vuln CVE-2024-34062 \
             --ignore-vuln CVE-2025-50181 \
             --ignore-vuln CVE-2025-66418 \
             --ignore-vuln CVE-2025-66471 \
-            --ignore-vuln CVE-2026-21441
+            --ignore-vuln CVE-2026-21441 \
+            --ignore-vuln CVE-2026-26007
