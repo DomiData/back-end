@@ -8,8 +8,8 @@ from app.core.firebase import initialize_firebase_app
 from app.core.config import settings
 from app.api.user import router as user_router
 from app.etl.main_etl import run_complete_etl
-from app.model.builder import HeatmapBuilderInput
-from app.model.builder.dashboard_input import DashboardBuilderInput
+from app.schema.builder import HeatmapBuilderInput
+from app.schema.builder.dashboard_input import DashboardBuilderInput
 from app.repository.query.dashboard_builder import DashboardQueryBuilder
 from app.repository.query.heatmap_builder import HeatMapQueryBuilder
 from app.utils.logger import logger

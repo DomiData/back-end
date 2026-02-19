@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from app.model.builder.enums import HeatmapGroupBy, HeatmapMetric
-from app.model.builder.filters import Filters
+from app.schema.builder.enums import HeatmapGroupBy, HeatmapMetric
+from app.schema.builder.filters import Filters
 
 
 class HeatmapBuilderInput(BaseModel):

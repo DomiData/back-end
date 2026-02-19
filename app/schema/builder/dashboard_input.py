@@ -1,7 +1,7 @@
 from typing import List
 from pydantic import BaseModel
-from app.model.builder.enums import DashboardGroupBy, DashboardMetric
-from app.model.builder.filters import Filters
+from app.schema.builder.enums import DashboardGroupBy, DashboardMetric
+from app.schema.builder.filters import Filters
 
 
 class DashboardBuilderInput(BaseModel):

@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.model.builder.filters import Filters
+from app.schema.builder.filters import Filters
 from app.model.disease import Disease
 from app.model.health_unit import HealthUnit
 from app.model.occurrence import Occurrence
@@ -44,7 +44,7 @@ class QueryBuilder:
         self.stmt = self.stmt.group_by(*columns)
 
     
-    def _apply_filters(self, f: Filters):
+    def apply_filters(self, f: Filters):
 
         if f.disease_acronym:
             self.base_join("disease")

@@ -1,11 +1,11 @@
 from sqlalchemy import func
 from app.model import Occurrence, Disease, HealthUnit
-from app.model.builder import (
+from app.schema.builder import (
     DashboardGroupBy as GroupBy,
     DashboardMetric as Metric,
     DashboardBuilderOutput,
 )
-from app.model.builder.dashboard_input import DashboardBuilderInput
+from app.schema.builder.dashboard_input import DashboardBuilderInput
 from app.repository.query.builder import QueryBuilder
 
 
@@ -18,7 +18,7 @@ class DashboardQueryBuilder:
 
         self.qb.apply_filters(params.filters)
         self._apply_group_by(params.group_by)
-        self._apply_metric(params.group_by, params.metric)
+        self._apply_metric(params.group_by, params.metrics[0])
 
         rows = await self.qb.execute()
 

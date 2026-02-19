@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo
 from functools import lru_cache
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
-from app.model.builder.heatmap_input import HeatmapBuilderInput
+from app.schema.builder.heatmap_input import HeatmapBuilderInput
 from app.core.config import settings
 
 SYSTEM_PROMPT = """
