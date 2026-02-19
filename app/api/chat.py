@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from cachetools import TTLCache
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.config import settings
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
 _agent: Any = None
-_chat_histories: dict[str, list] = {}
+_chat_histories: TTLCache = TTLCache(maxsize=500, ttl=1200)  # 20 min TTL
 
 
 def _get_agent():
@@ -39,10 +40,7 @@ async def send_message(
     agent = _get_agent()
 
     uid = claims.get("uid", "anonymous")
-    if uid not in _chat_histories:
-        _chat_histories[uid] = []
-
-    chat_history = _chat_histories[uid]
+    chat_history = list(_chat_histories.get(uid, []))
 
     try:
         response = await run_agent(agent, body.message, chat_history)
@@ -53,11 +51,11 @@ async def send_message(
             detail="Erro interno ao processar a mensagem. Tente novamente.",
         ) from e
 
-    # Update in-memory history (keep last 20 exchanges)
     chat_history.append(("human", body.message))
     chat_history.append(("ai", response.answer))
     if len(chat_history) > 40:
-        _chat_histories[uid] = chat_history[-40:]
+        chat_history = chat_history[-40:]
+    _chat_histories[uid] = chat_history  # write back to TTLCache (resets TTL)
 
     return response
 

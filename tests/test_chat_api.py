@@ -29,8 +29,8 @@ os.environ.setdefault("OPENAI_API_KEY", "test-key")
 from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
-from app.core.security import get_firebase_claims  # noqa: E402
 from app.api.chat import router as chat_router  # noqa: E402
+from app.core.security import get_firebase_claims  # noqa: E402
 from app.schema.chat import ChatMessageResponse, SourceReference  # noqa: E402
 from app.services.chat.prompts import DISCLAIMER_PT  # noqa: E402
 
