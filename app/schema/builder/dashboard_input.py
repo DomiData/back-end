@@ -6,6 +6,6 @@ from app.schema.builder.filters import Filters
 
 class DashboardBuilderInput(BaseModel):
     filters: Filters
-    group_by: DashboardGroupBy
+    group_by: List[DashboardGroupBy]
     metrics: List[DashboardMetric]
  

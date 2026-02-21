@@ -7,6 +7,7 @@ from app.schema.builder import (
 )
 from app.schema.builder.dashboard_input import DashboardBuilderInput
 from app.repository.query.builder import QueryBuilder
+from typing import List
 
 
 class DashboardQueryBuilder:
@@ -18,7 +19,7 @@ class DashboardQueryBuilder:
 
         self.qb.apply_filters(params.filters)
         self._apply_group_by(params.group_by)
-        self._apply_metric(params.group_by, params.metrics[0])
+        self._apply_metric(params.group_by, params.metrics)
 
         rows = await self.qb.execute()
 
@@ -28,76 +29,82 @@ class DashboardQueryBuilder:
         ]
 
 
-    def _apply_group_by(self, gb: GroupBy):
+    def _apply_group_by(self, gb: List[GroupBy]):
 
-        if gb == GroupBy.DISEASE:
+        if GroupBy.DISEASE in gb:
             self.qb.base_join("disease")
             self.qb.group_by(Disease.name)
 
-        elif gb == GroupBy.CITY:
+        if GroupBy.CITY in gb:
             self.qb.base_join("health_unit")
             self.qb.group_by(HealthUnit.city_code)
 
-        elif gb == GroupBy.HEALTH_UNIT:
+        if GroupBy.HEALTH_UNIT in gb:
             self.qb.base_join("health_unit")
             self.qb.group_by(HealthUnit.name)
 
-        elif gb == GroupBy.EVOLUTION:
+        if GroupBy.EVOLUTION in gb:
             self.qb.group_by(Occurrence.evolution)
 
-        elif gb == GroupBy.SEX:
+        if GroupBy.SEX in gb:
             self.qb.group_by(Occurrence.patient_sex)
 
-        elif gb == GroupBy.DISTRICT:
+        if GroupBy.DISTRICT in gb:
             self.qb.base_join("health_unit")
             self.qb.group_by(HealthUnit.district)
 
 
-    def _apply_metric(self, gb: GroupBy, metric: Metric):
-
-        label_column = self._resolve_label_column(gb)
-        value_column = self._resolve_metric_column(metric)
+    def _apply_metric(self, gb: List[GroupBy], metrics: List[Metric]):
+        
+        label_columns = self._resolve_label_column(gb)
+        value_columns = self._resolve_metric_column(metrics)
 
         self.qb.select(
-            label_column.label("label"),
-            value_column.label("value"),
+            *label_columns,
+            *value_columns
         )
 
 
 
-    def _resolve_label_column(self, group_by):
+    def _resolve_label_column(self, group_by: List[GroupBy]):
 
-        if group_by == GroupBy.DISEASE:
-            return Disease.name
+        columns = []
 
-        elif group_by == GroupBy.CITY:
-            return HealthUnit.city_code
+        if GroupBy.DISEASE in group_by:
+            columns.append(Disease.name)
 
-        elif group_by == GroupBy.HEALTH_UNIT:
-            return HealthUnit.name
+        if GroupBy.CITY in group_by:
+            columns.append(HealthUnit.city_code)
 
-        elif group_by == GroupBy.EVOLUTION:
-            return Occurrence.evolution
+        if GroupBy.HEALTH_UNIT in group_by:
+            columns.append(HealthUnit.name)
 
-        elif group_by == GroupBy.SEX:
-            return Occurrence.patient_sex
+        if GroupBy.EVOLUTION in group_by:
+            columns.append(Occurrence.evolution)
+
+        if GroupBy.SEX in group_by:
+            columns.append(Occurrence.patient_sex)
         
-        elif group_by == GroupBy.DISTRICT:
-            return HealthUnit.district
+        if GroupBy.DISTRICT in group_by:
+            columns.append(HealthUnit.district)
 
+        return columns
 
-    def _resolve_metric_column(self, metric):
+    def _resolve_metric_column(self, metric: List[Metric]):
 
-        if metric == Metric.COUNT:
-            return func.count(Occurrence.id)
+        columns = []
 
-        elif metric == Metric.AVG_AGE:
-            return func.avg(Occurrence.patient_age)
+        if Metric.COUNT in metric:
+            columns.append(func.count(Occurrence.id).label("count"))
 
-        elif metric == Metric.MIN_AGE:
-            return func.min(Occurrence.patient_age)
+        if Metric.AVG_AGE in metric:
+            columns.append(func.avg(Occurrence.patient_age).label("avg_age"))
 
-        elif metric == Metric.MAX_AGE:
-            return func.max(Occurrence.patient_age)
+        if Metric.MIN_AGE in metric:
+            columns.append(func.min(Occurrence.patient_age).label("min_age"))
+
+        if Metric.MAX_AGE in metric:
+            columns.append(func.max(Occurrence.patient_age).label("max_age"))
 
         
+        return columns
