@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Annotated
 from fastapi.params import Depends
 from fastapi.exceptions import HTTPException
 from app.model.role import Role
@@ -10,7 +10,7 @@ class RoleChecker:
     def __init__(self, allowed_roles: List[Role]):
         self.allowed_roles = allowed_roles
 
-    def __call__(self, user: User = Depends(get_current_user)):
+    def __call__(self, user: Annotated[User, Depends(get_current_user)]):
         for role in user.roles:
             if role in self.allowed_roles:
                 return True
