@@ -3,7 +3,6 @@ from app.model import Occurrence, Disease, HealthUnit
 from app.schema.builder import (
     DashboardGroupBy as GroupBy,
     DashboardMetric as Metric,
-    DashboardBuilderOutput,
 )
 from app.schema.builder.dashboard_input import DashboardBuilderInput
 from app.repository.query.builder import QueryBuilder
@@ -14,6 +13,7 @@ class DashboardQueryBuilder:
 
     def __init__(self, session):
         self.qb = QueryBuilder(session)
+        self.all_columns = []
 
     async def build(self, params: DashboardBuilderInput):
 
@@ -22,11 +22,15 @@ class DashboardQueryBuilder:
         self._apply_metric(params.group_by, params.metrics)
 
         rows = await self.qb.execute()
+        result = []
 
-        return [
-            DashboardBuilderOutput(label=row.label, value=row.value)
-            for row in rows
-        ]
+        for row in rows:
+            row_dict = {}
+            for item in self.all_columns:
+                row_dict[item] = getattr(row, item)
+            result.append(row_dict)
+
+        return result
 
 
     def _apply_group_by(self, gb: List[GroupBy]):
@@ -59,9 +63,11 @@ class DashboardQueryBuilder:
         label_columns = self._resolve_label_column(gb)
         value_columns = self._resolve_metric_column(metrics)
 
+        self.all_columns = [col.key for col in (label_columns + value_columns)]
+
         self.qb.select(
-            *label_columns,
-            *value_columns
+           *label_columns,
+           *value_columns
         )
 
 
@@ -71,22 +77,22 @@ class DashboardQueryBuilder:
         columns = []
 
         if GroupBy.DISEASE in group_by:
-            columns.append(Disease.name)
+            columns.append(Disease.name.label("disease_name"))
 
         if GroupBy.CITY in group_by:
-            columns.append(HealthUnit.city_code)
+            columns.append(HealthUnit.city_code.label("city_code"))
 
         if GroupBy.HEALTH_UNIT in group_by:
-            columns.append(HealthUnit.name)
+            columns.append(HealthUnit.name.label("health_unit_name"))
 
         if GroupBy.EVOLUTION in group_by:
-            columns.append(Occurrence.evolution)
+            columns.append(Occurrence.evolution.label("evolution"))
 
         if GroupBy.SEX in group_by:
-            columns.append(Occurrence.patient_sex)
+            columns.append(Occurrence.patient_sex.label("patient_sex"))
         
         if GroupBy.DISTRICT in group_by:
-            columns.append(HealthUnit.district)
+            columns.append(HealthUnit.district.label("district"))
 
         return columns
 
