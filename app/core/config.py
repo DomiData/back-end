@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     POPULATE_DB: bool = False
     GOOGLE_API_KEY: str
     FIREBASE_CREDENTIALS_PATH: FilePath
+
+    OPENAI_API_KEY: str = ""
+    PREDICTION_DATA_DIR: str = "prediction-service/src/output"
+
     model_config = SettingsConfigDict(
         env_file=ENV_PATH,
         extra="ignore",

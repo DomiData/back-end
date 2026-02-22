@@ -6,6 +6,7 @@ from app.core.database import create_db, SessionLocal, get_db
 from app.core.firebase import initialize_firebase_app
 from app.core.config import settings
 from app.api.user import router as user_router
+from app.api.chat import router as chat_router
 from app.etl.main_etl import run_complete_etl
 from app.model.heatmap_builder import HeatmapQueryBuilderInput
 from app.services.builder import HeatMapQueryBuilder
@@ -35,6 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(user_router)
+app.include_router(chat_router)
 
 
 @app.post("/heatmap")
