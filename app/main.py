@@ -8,8 +8,10 @@ from app.core.config import settings
 from app.api.user import router as user_router
 from app.api.chat import router as chat_router
 from app.etl.main_etl import run_complete_etl
-from app.model.heatmap_builder import HeatmapQueryBuilderInput
-from app.services.builder import HeatMapQueryBuilder
+from app.schema.builder import HeatmapBuilderInput
+from app.schema.builder.dashboard_input import DashboardBuilderInput
+from app.repository.query.dashboard_builder import DashboardQueryBuilder
+from app.repository.query.heatmap_builder import HeatMapQueryBuilder
 from app.utils.logger import logger
 from app.schema.requests import NaturalSearchRequest
 from app.services.parser import QueryIntentParser, get_query_intent_parser
@@ -40,10 +42,17 @@ app.include_router(chat_router)
 
 
 @app.post("/heatmap")
-async def heatmap(
-    params: HeatmapQueryBuilderInput, session: AsyncSession = Depends(get_db)
-):
+async def heatmap(params: HeatmapBuilderInput, session: AsyncSession = Depends(get_db)):
     query_builder = HeatMapQueryBuilder(session)
+    result = await query_builder.build(params)
+    return result
+
+
+@app.post("/dashboard")
+async def dashboard(
+    params: DashboardBuilderInput, session: AsyncSession = Depends(get_db)
+):
+    query_builder = DashboardQueryBuilder(session)
     result = await query_builder.build(params)
     return result
 
