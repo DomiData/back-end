@@ -14,7 +14,6 @@ class Filters(BaseModel):
     unit_type: Optional[str] = None
     city_code: Optional[str] = None
 
-
     @field_validator("*", mode="before")
     @classmethod
     def normalize_strings(cls, v):

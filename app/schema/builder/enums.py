@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class CaseInsensitiveEnum(str, Enum):
     @classmethod
     def _missing_(cls, value):
@@ -35,4 +36,3 @@ class DashboardMetric(CaseInsensitiveEnum):
     MAX_AGE = "max_age"
     RECOVERY_RATE = "recovery_rate"
     FATALITY_RATE = "fatality_rate"
-

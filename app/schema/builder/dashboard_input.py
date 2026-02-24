@@ -8,4 +8,3 @@ class DashboardBuilderInput(BaseModel):
     filters: Filters
     group_by: List[DashboardGroupBy]
     metrics: List[DashboardMetric]
- 

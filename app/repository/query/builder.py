@@ -7,27 +7,22 @@ from app.model.occurrence import Occurrence
 
 
 class QueryBuilder:
-
     JOINS = {
         "disease": Disease,
         "health_unit": HealthUnit,
     }
-
 
     def __init__(self, session: AsyncSession):
         self.session = session
         self.stmt = select(Occurrence)
         self._joined = set()
 
-
     async def execute(self):
         result = await self.session.execute(self.stmt)
         return result.all()
-    
-    
+
     def select(self, *columns):
         self.stmt = self.stmt.with_only_columns(*columns)
-
 
     def base_join(self, key):
         if key not in self._joined:
@@ -35,15 +30,12 @@ class QueryBuilder:
             self.stmt = self.stmt.join(model)
             self._joined.add(key)
 
-
     def where(self, condition):
         self.stmt = self.stmt.where(condition)
-
 
     def group_by(self, *columns):
         self.stmt = self.stmt.group_by(*columns)
 
-    
     def apply_filters(self, f: Filters):
 
         if f.disease_acronym:
@@ -75,4 +67,3 @@ class QueryBuilder:
         if f.city_code:
             self.base_join("health_unit")
             self.where(HealthUnit.city_code == f.city_code)
-

@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import func
 from app.model import Occurrence, HealthUnit
 from app.schema.builder import (
     HeatmapGroupBy as GroupBy,
@@ -11,11 +11,8 @@ from app.repository.query.builder import QueryBuilder
 
 
 class HeatMapQueryBuilder:
-
-
     def __init__(self, session: AsyncSession):
         self.qb = QueryBuilder(session)
-
 
     async def build(self, params: HeatmapBuilderInput):
 
@@ -29,7 +26,6 @@ class HeatMapQueryBuilder:
             HeatmapBuilderOutput(lat=row.lat, lng=row.lng, value=row.value)
             for row in rows
         ]
-
 
     def _apply_group_by(self, gb: GroupBy):
 
@@ -56,7 +52,6 @@ class HeatMapQueryBuilder:
                 HealthUnit.latitude,
                 HealthUnit.longitude,
             )
-
 
     def _apply_metric(self, metric: Metric):
         if metric != Metric.COUNT:

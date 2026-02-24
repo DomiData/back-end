@@ -10,7 +10,6 @@ from typing import List
 
 
 class DashboardQueryBuilder:
-
     def __init__(self, session):
         self.qb = QueryBuilder(session)
         self.all_columns = []
@@ -31,7 +30,6 @@ class DashboardQueryBuilder:
             result.append(row_dict)
 
         return result
-
 
     def _apply_group_by(self, gb: List[GroupBy]):
 
@@ -57,20 +55,14 @@ class DashboardQueryBuilder:
             self.qb.base_join("health_unit")
             self.qb.group_by(HealthUnit.district)
 
-
     def _apply_metric(self, gb: List[GroupBy], metrics: List[Metric]):
-        
+
         label_columns = self._resolve_label_column(gb)
         value_columns = self._resolve_metric_column(metrics)
 
         self.all_columns = [col.name for col in (label_columns + value_columns)]
 
-        self.qb.select(
-           *label_columns,
-           *value_columns
-        )
-
-
+        self.qb.select(*label_columns, *value_columns)
 
     def _resolve_label_column(self, group_by: List[GroupBy]):
 
@@ -90,7 +82,7 @@ class DashboardQueryBuilder:
 
         if GroupBy.SEX in group_by:
             columns.append(Occurrence.patient_sex.label("patient_sex"))
-        
+
         if GroupBy.DISTRICT in group_by:
             columns.append(HealthUnit.district.label("district"))
 
@@ -113,56 +105,43 @@ class DashboardQueryBuilder:
             columns.append(func.max(Occurrence.patient_age).label("max_age"))
 
         if Metric.RECOVERY_RATE in metric:
+            recovery_count = func.sum(case((Occurrence.evolution == "1", 1)), else_=0)
 
-            recovery_count = func.sum(
-                case((Occurrence.evolution == "1", 1)),
-                else_=0)
-            
             valid_cases_count = func.sum(
-                case((Occurrence.evolution.in_(["1", "2", "3"]), 1)),
-                else_=0)
-
+                case((Occurrence.evolution.in_(["1", "2", "3"]), 1)), else_=0
+            )
 
             not_registered = func.sum(
                 case(
-                    (func.trim(func.coalesce(Occurrence.evolution, '')) == '', 1),
-                    else_=0
+                    (func.trim(func.coalesce(Occurrence.evolution, "")) == "", 1),
+                    else_=0,
                 )
             )
 
             columns.append(
-                ((recovery_count/valid_cases_count)*100).label("recovery_rate")
+                ((recovery_count / valid_cases_count) * 100).label("recovery_rate")
             )
 
-            columns.append(
-                (not_registered).label("evolution_not_registered")
-            )
-
+            columns.append((not_registered).label("evolution_not_registered"))
 
         if Metric.FATALITY_RATE in metric:
+            fatality_count = func.sum(case((Occurrence.evolution == "2", 1)), else_=0)
 
-            fatality_count = func.sum(
-                case((Occurrence.evolution == "2", 1)),
-                else_=0)
-            
             valid_cases_count = func.sum(
-                case((Occurrence.evolution.in_(["1", "2", "3"]), 1)),
-                else_=0)
+                case((Occurrence.evolution.in_(["1", "2", "3"]), 1)), else_=0
+            )
 
             not_registered = func.sum(
                 case(
-                    (func.trim(func.coalesce(Occurrence.evolution, '')) == '', 1),
-                    else_=0
+                    (func.trim(func.coalesce(Occurrence.evolution, "")) == "", 1),
+                    else_=0,
                 )
             )
 
             columns.append(
-                ((fatality_count/valid_cases_count)*100).label("fatality_rate")
+                ((fatality_count / valid_cases_count) * 100).label("fatality_rate")
             )
 
-            columns.append(
-                (not_registered).label("evolution_not_registered")
-            )
+            columns.append((not_registered).label("evolution_not_registered"))
 
         return columns
-    

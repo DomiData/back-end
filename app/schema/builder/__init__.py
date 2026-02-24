@@ -1,4 +1,4 @@
-from .heatmap_input import HeatmapBuilderInput 
+from .heatmap_input import HeatmapBuilderInput
 from .heatmap_output import HeatmapBuilderOutput
 from .enums import HeatmapGroupBy, HeatmapMetric, DashboardGroupBy, DashboardMetric
 from .filters import Filters
