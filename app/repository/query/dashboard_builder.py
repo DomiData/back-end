@@ -63,7 +63,7 @@ class DashboardQueryBuilder:
         label_columns = self._resolve_label_column(gb)
         value_columns = self._resolve_metric_column(metrics)
 
-        self.all_columns = [col.key for col in (label_columns + value_columns)]
+        self.all_columns = [col.name for col in (label_columns + value_columns)]
 
         self.qb.select(
            *label_columns,
@@ -113,12 +113,56 @@ class DashboardQueryBuilder:
             columns.append(func.max(Occurrence.patient_age).label("max_age"))
 
         if Metric.RECOVERY_RATE in metric:
+
+            recovery_count = func.sum(
+                case((Occurrence.evolution == "1", 1)),
+                else_=0)
             
-            func.sum(case((Occurrence.evolution == 1, 1),
-                    else_=0))/func.count(Occurrence.id).label("recovery_rate")
+            valid_cases_count = func.sum(
+                case((Occurrence.evolution.in_(["1", "2", "3"]), 1)),
+                else_=0)
+
+
+            not_registered = func.sum(
+                case(
+                    (func.trim(func.coalesce(Occurrence.evolution, '')) == '', 1),
+                    else_=0
+                )
+            )
+
+            columns.append(
+                ((recovery_count/valid_cases_count)*100).label("recovery_rate")
+            )
+
+            columns.append(
+                (not_registered).label("evolution_not_registered")
+            )
+
 
         if Metric.FATALITY_RATE in metric:
-            func.sum(case((Occurrence.evolution == 2, 1),
-                    else_=0)) / func.count(Occurrence.id).label("fatality_rate")
+
+            fatality_count = func.sum(
+                case((Occurrence.evolution == "2", 1)),
+                else_=0)
+            
+            valid_cases_count = func.sum(
+                case((Occurrence.evolution.in_(["1", "2", "3"]), 1)),
+                else_=0)
+
+            not_registered = func.sum(
+                case(
+                    (func.trim(func.coalesce(Occurrence.evolution, '')) == '', 1),
+                    else_=0
+                )
+            )
+
+            columns.append(
+                ((fatality_count/valid_cases_count)*100).label("fatality_rate")
+            )
+
+            columns.append(
+                (not_registered).label("evolution_not_registered")
+            )
 
         return columns
+    
