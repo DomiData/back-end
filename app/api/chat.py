@@ -61,9 +61,9 @@ async def send_message(
 
 
 # Temporary test endpoint - remove in production
-@router.post("/test", status_code=200, response_model=ChatMessageResponse)
-async def test_message(body: ChatMessageRequest):
-    """Test endpoint without authentication - for development only."""
-    agent = _get_agent()
-    response = await run_agent(agent, body.message, [])
-    return response
+# @router.post("/test", status_code=200, response_model=ChatMessageResponse)
+# async def test_message(body: ChatMessageRequest):
+#     """Test endpoint without authentication - for development only."""
+#     agent = _get_agent()
+#     response = await run_agent(agent, body.message, [])
+#     return response
