@@ -15,7 +15,7 @@ class QueryBuilder:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.stmt = select(Occurrence)
-        self._joined = set()
+        self._joined: set[str] = set()
 
     async def execute(self):
         result = await self.session.execute(self.stmt)

@@ -2,8 +2,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends, HTTPException
 from app.core.security import get_firebase_claims
 from app.core.database import get_db
-from app.repository.occurrence import OccurrenceRepository
-from app.services.report import ReportService
 from app.services.user import UserService
 from app.model.user import User
 
@@ -20,7 +18,3 @@ async def get_current_user(
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
-
-
-async def get_report_service(db: AsyncSession = Depends(get_db)) -> ReportService:
-    return ReportService(OccurrenceRepository(db))

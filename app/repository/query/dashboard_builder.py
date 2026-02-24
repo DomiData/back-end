@@ -1,4 +1,5 @@
 from sqlalchemy import case, func
+from sqlalchemy.sql.elements import ColumnElement
 from app.model import Occurrence, Disease, HealthUnit
 from app.schema.builder import (
     DashboardGroupBy as GroupBy,
@@ -6,7 +7,7 @@ from app.schema.builder import (
 )
 from app.schema.builder.dashboard_input import DashboardBuilderInput
 from app.repository.query.builder import QueryBuilder
-from typing import List
+from typing import List, Any
 
 
 class DashboardQueryBuilder:
@@ -90,7 +91,7 @@ class DashboardQueryBuilder:
 
     def _resolve_metric_column(self, metric: List[Metric]):
 
-        columns = []
+        columns: list[ColumnElement[Any]] = []
 
         if Metric.COUNT in metric:
             columns.append(func.count(Occurrence.id).label("count"))
