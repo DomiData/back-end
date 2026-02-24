@@ -36,7 +36,7 @@ def download_raw_cnes(output_dir):
                 BASE_URL,
                 params={"path": zip_name},
                 stream=True,
-                verify=False,
+                verify=True,
                 timeout=60,
             )
 

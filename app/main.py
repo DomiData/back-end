@@ -1,12 +1,12 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from app.core.database import create_db, SessionLocal, get_db
 from app.core.firebase import initialize_firebase_app
 from app.core.config import settings
 from app.api.user import router as user_router
+from app.api.chat import router as chat_router
 from app.etl.main_etl import run_complete_etl
 from app.schema.builder import HeatmapBuilderInput
 from app.schema.builder.dashboard_input import DashboardBuilderInput
@@ -38,17 +38,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(user_router)
+app.include_router(chat_router)
 
 
 @app.post("/heatmap")
-async def heatmap(params: HeatmapBuilderInput, session: Session = Depends(get_db)):
+async def heatmap(
+    params: HeatmapQueryBuilderInput, session: AsyncSession = Depends(get_db)
+):
     query_builder = HeatMapQueryBuilder(session)
     result = await query_builder.build(params)
     return result
 
 
 @app.post("/dashboard")
-async def dashboard(params: DashboardBuilderInput, session: Session = Depends(get_db)):
+async def dashboard(params: DashboardBuilderInput, session: AsyncSession = Depends(get_db)):
     query_builder = DashboardQueryBuilder(session)
     result = await query_builder.build(params)
     return result

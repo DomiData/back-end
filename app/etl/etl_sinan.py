@@ -22,6 +22,7 @@ def main():
         "DT_NOTIFIC",
         "ID_UNIDADE",
         "ID_MUNICIP",
+        "ID_MN_RESI",
     ]  # DATA, O Posot de Saúde, Município
     OPTIONAL = ["NU_IDADE_N", "CS_SEXO", "EVOLUCAO"]
 

@@ -73,6 +73,7 @@ def filter_state_and_columns(df_national, state_code, mandatory_cols, optional_c
     logger.debug("Formatting patient age (SINAN pattern)...")
     df_state["NU_IDADE_N"] = df_state["NU_IDADE_N"].apply(clean_sinan_age)
     df_state["ID_MUNICIP"] = df_state["ID_MUNICIP"].apply(calcular_dv_ibge)
+    df_state["ID_MN_RESI"] = df_state["ID_MN_RESI"].apply(calcular_dv_ibge)
 
     logger.info(f"Successfully filtered {len(df_state)} records for the target state.")
 

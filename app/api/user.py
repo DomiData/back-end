@@ -29,4 +29,4 @@ async def sync_user(
 
 @router.get("/me", status_code=200, response_model=UserResponse)
 async def get_user(user: User = Depends(get_current_user)):
-    return user
+    return UserResponse.model_validate(user)
