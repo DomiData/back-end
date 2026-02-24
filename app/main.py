@@ -42,16 +42,16 @@ app.include_router(chat_router)
 
 
 @app.post("/heatmap")
-async def heatmap(
-    params: HeatmapQueryBuilderInput, session: AsyncSession = Depends(get_db)
-):
+async def heatmap(params: HeatmapBuilderInput, session: AsyncSession = Depends(get_db)):
     query_builder = HeatMapQueryBuilder(session)
     result = await query_builder.build(params)
     return result
 
 
 @app.post("/dashboard")
-async def dashboard(params: DashboardBuilderInput, session: AsyncSession = Depends(get_db)):
+async def dashboard(
+    params: DashboardBuilderInput, session: AsyncSession = Depends(get_db)
+):
     query_builder = DashboardQueryBuilder(session)
     result = await query_builder.build(params)
     return result
