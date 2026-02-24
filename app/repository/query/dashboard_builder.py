@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import case, func
 from app.model import Occurrence, Disease, HealthUnit
 from app.schema.builder import (
     DashboardGroupBy as GroupBy,
@@ -112,5 +112,13 @@ class DashboardQueryBuilder:
         if Metric.MAX_AGE in metric:
             columns.append(func.max(Occurrence.patient_age).label("max_age"))
 
-        
+        if Metric.RECOVERY_RATE in metric:
+            
+            func.sum(case((Occurrence.evolution == 1, 1),
+                    else_=0))/func.count(Occurrence.id).label("recovery_rate")
+
+        if Metric.FATALITY_RATE in metric:
+            func.sum(case((Occurrence.evolution == 2, 1),
+                    else_=0)) / func.count(Occurrence.id).label("fatality_rate")
+
         return columns

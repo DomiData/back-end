@@ -34,7 +34,7 @@ class HeatMapQueryBuilder:
     def _apply_group_by(self, gb: GroupBy):
 
         if gb == GroupBy.HEALTH_UNIT:
-            self.qb.join("health_unit")
+            self.qb.base_join("health_unit")
             self.qb.group_by(
                 HealthUnit.cnes_code,
                 HealthUnit.latitude,
@@ -42,7 +42,7 @@ class HeatMapQueryBuilder:
             )
 
         elif gb == GroupBy.DISTRICT:
-            self.qb.join("health_unit")
+            self.qb.base_join("health_unit")
             self.qb.group_by(
                 HealthUnit.district,
                 HealthUnit.latitude,
@@ -50,7 +50,7 @@ class HeatMapQueryBuilder:
             )
 
         elif gb == GroupBy.CITY:
-            self.qb.join("health_unit")
+            self.qb.base_join("health_unit")
             self.qb.group_by(
                 HealthUnit.city_code,
                 HealthUnit.latitude,
@@ -62,7 +62,7 @@ class HeatMapQueryBuilder:
         if metric != Metric.COUNT:
             return
 
-        self.qb.join("health_unit")
+        self.qb.base_join("health_unit")
 
         self.qb.select(
             HealthUnit.latitude.label("lat"),
