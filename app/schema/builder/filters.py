@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+from pydantic_core.core_schema import FieldValidationInfo
 
 
 class Filters(BaseModel):
@@ -14,3 +15,10 @@ class Filters(BaseModel):
     unit_type: Optional[str] = None
     city_code: Optional[str] = None
 
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def normalize_strings(cls, v, info: FieldValidationInfo):
+        if isinstance(v, str):
+            return v.upper() if info.field_name == "disease_acronym" else v.lower()
+        return v
