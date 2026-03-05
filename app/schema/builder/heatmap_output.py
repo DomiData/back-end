@@ -1,7 +1,8 @@
+from decimal import Decimal
 from pydantic import BaseModel
 
 
 class HeatmapBuilderOutput(BaseModel):
-    lat: float
-    lng: float
+    lat: Decimal
+    lng: Decimal
     value: int
