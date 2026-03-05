@@ -14,12 +14,13 @@ services:
     build: .
     ports:
       - "8080:8080"
+    env_file:
+      - ".env"
     volumes:
       - .:/app
     depends_on:
       - db
     command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
-
 
   pgadmin:
     image: dpage/pgadmin4
