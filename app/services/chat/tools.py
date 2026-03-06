@@ -113,7 +113,9 @@ def create_agent_tools(session: AsyncSession) -> list:
         result = await builder.get_geographic_distribution(code)
         if result.get("available"):
             result["tipo_fonte"] = "database"
-            result["detalhe_fonte"] = f"banco de dados - distribuicao geografica {doenca}"
+            result["detalhe_fonte"] = (
+                f"banco de dados - distribuicao geografica {doenca}"
+            )
         return json.dumps(result, ensure_ascii=False)
 
     return [
