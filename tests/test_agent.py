@@ -14,10 +14,11 @@ from app.services.chat.prompts import DISCLAIMER_PT
 
 
 class TestCreateAgent:
-    @patch("app.services.chat.agent.ChatOpenAI")
-    def test_creates_agent_without_error(self, mock_llm, prediction_data_dir):
-        mock_llm.return_value = MagicMock()
-        agent = create_chat_agent("test-key", prediction_data_dir)
+    @patch("app.services.chat.agent._get_llm")
+    def test_creates_agent_without_error(self, mock_get_llm):
+        mock_get_llm.return_value = MagicMock()
+        mock_session = AsyncMock()
+        agent = create_chat_agent("test-key", mock_session)
         assert agent is not None
 
 
@@ -36,22 +37,22 @@ class TestExtractSourcesFromMessages:
         assert len(sources) == 1
         assert sources[0].type == "general_knowledge"
 
-    def test_with_prediction_data_tool_message(self):
+    def test_with_database_tool_message(self):
         messages = [
             ToolMessage(
-                content='{"tipo_fonte": "prediction_data", "detalhe_fonte": "time_series.csv - dengue"}',
+                content='{"tipo_fonte": "database", "detalhe_fonte": "banco de dados - tendencia dengue"}',
                 tool_call_id="123",
                 name="consultar_tendencia",
             ),
         ]
         sources = _extract_sources_from_messages(messages)
         assert len(sources) == 1
-        assert sources[0].type == "prediction_data"
-        assert sources[0].detail == "time_series.csv - dengue"
+        assert sources[0].type == "database"
+        assert sources[0].detail == "banco de dados - tendencia dengue"
 
     def test_deduplicates_sources(self):
         tool_msg = ToolMessage(
-            content='{"tipo_fonte": "prediction_data", "detalhe_fonte": "time_series.csv"}',
+            content='{"tipo_fonte": "database", "detalhe_fonte": "banco de dados - tendencia dengue"}',
             tool_call_id="123",
             name="consultar_tendencia",
         )
@@ -109,7 +110,7 @@ class TestRunAgent:
             "messages": [
                 HumanMessage(content="Tendencia de dengue"),
                 ToolMessage(
-                    content='{"tipo_fonte": "prediction_data", "detalhe_fonte": "time_series.csv - dengue"}',
+                    content='{"tipo_fonte": "database", "detalhe_fonte": "banco de dados - tendencia dengue"}',
                     tool_call_id="1",
                     name="consultar_tendencia",
                 ),
@@ -119,4 +120,4 @@ class TestRunAgent:
 
         result = await run_agent(mock_agent, "Tendencia de dengue", [])
 
-        assert any(s.type == "prediction_data" for s in result.sources)
+        assert any(s.type == "database" for s in result.sources)

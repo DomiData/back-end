@@ -4,18 +4,23 @@ from cachetools import TTLCache
 from fastapi import FastAPI, HTTPException
 
 import app.api.chat as _chat_module
-from app.api.chat import router as chat_router, _get_agent
+from app.api.chat import router as chat_router
+from app.core.config import settings
 from app.schema.chat import ChatMessageRequest, ChatMessageResponse
-from app.services.chat.agent import run_agent
+from app.services.chat.agent import create_chat_agent, run_agent
 
 app = FastAPI()
 app.include_router(chat_router)
 
 
 @app.post("/chat/test-session", response_model=ChatMessageResponse)
-async def test_session_message(body: ChatMessageRequest, uid: str = "test-session"):
+async def session_message(body: ChatMessageRequest, uid: str = "test-session"):
     """Session-aware test endpoint (no auth). Lives in the test server only."""
-    agent = _get_agent()
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from unittest.mock import AsyncMock
+
+    mock_session = AsyncMock(spec=AsyncSession)
+    agent = create_chat_agent(settings.OPENAI_API_KEY, mock_session)
     chat_history = list(_chat_module._chat_histories.get(uid, []))
 
     try:

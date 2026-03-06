@@ -30,6 +30,7 @@ from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app.api.chat import router as chat_router  # noqa: E402
+from app.core.database import get_db  # noqa: E402
 from app.core.security import get_firebase_claims  # noqa: E402
 from app.schema.chat import ChatMessageResponse, SourceReference  # noqa: E402
 from app.services.chat.prompts import DISCLAIMER_PT  # noqa: E402
@@ -60,12 +61,13 @@ def client(mock_response):
         "uid": "test-user-123",
         "email": "test@example.com",
     }
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
 
     with (
         patch("app.api.chat.run_agent", new_callable=AsyncMock) as mock_run,
-        patch("app.api.chat._get_agent") as mock_get,
+        patch("app.api.chat.create_chat_agent") as mock_create,
     ):
-        mock_get.return_value = MagicMock()
+        mock_create.return_value = MagicMock()
         mock_run.return_value = mock_response
 
         with TestClient(app) as c:
