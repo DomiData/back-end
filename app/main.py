@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     if settings.POPULATE_DB:
         async with SessionLocal() as session:
             logger.warning("Database populated with data!")
-            await run_complete_etl(session)
+            await run_complete_etl(session, settings.NEW_DATA)
     yield
 
 

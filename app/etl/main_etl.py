@@ -8,11 +8,12 @@ from app.utils.logger import logger
 import os
 
 
-async def run_complete_etl(db: AsyncSession):
+async def run_complete_etl(db: AsyncSession, new_data: bool = False):
     logger.info("Starting LOAD ETL process")
 
-    run_elt_cnes()
-    run_elt_sinan()
+    if new_data:
+        run_elt_cnes()
+        run_elt_sinan()
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
