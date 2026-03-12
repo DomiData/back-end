@@ -258,3 +258,45 @@ class AgentQueryBuilder:
             "top_health_units": top_units,
             "total_districts": len(districts),
         }
+
+    async def get_distribution_by_municipality(
+        self, disease_acronym: str
+    ) -> dict[str, Any]:
+        f = Filters(disease_acronym=disease_acronym)
+
+        qb = QueryBuilder(self.session)
+        qb.select(
+            HealthUnit.city_code.label("city_code"),
+            func.count(Occurrence.id).label("count"),
+        )
+        qb.base_join("health_unit")
+        qb.apply_filters(f)
+        qb.group_by(HealthUnit.city_code)
+        qb.stmt = qb.stmt.order_by(func.count(Occurrence.id).desc())
+        rows = await qb.execute()
+
+        if not rows:
+            return {
+                "available": False,
+                "message": (
+                    f"Nenhum dado por municipio encontrado para '{disease_acronym}'."
+                ),
+            }
+
+        municipalities = [
+            {
+                "city_code": r.city_code or "nao_informado",
+                "cases": int(r.count),
+            }
+            for r in rows
+        ]
+
+        total_cases = sum(m["cases"] for m in municipalities)
+
+        return {
+            "available": True,
+            "disease_code": disease_acronym.upper(),
+            "by_municipality": municipalities[:20],
+            "total_municipalities": len(municipalities),
+            "total_cases": total_cases,
+        }

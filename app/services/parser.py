@@ -32,12 +32,23 @@ Sua tarefa é converter a intenção do usuário EXATAMENTE no esquema JSON de e
 Conforme documentação técnica, utilize apenas estas 3 opções:
 1. **"health_unit"**: Para análises por infraestrutura (postos, unidades de saúde).
 2. **"district"**: Para análises por bairros ou distritos.
-3. **"city"**: (PADRÃO) Para visão geral do município ou comparações entre cidades.
+3. **"city"**: (PADRÃO) Para visão geral do município ou comparações entre cidades/municípios.
+   - Use este agrupamento quando o usuário pedir dados "por município", "por cidade", ou comparar localidades.
    - *Atenção:* Se o usuário pedir "evolução temporal" (ex: "por dia", "por mês"), mantenha `group_by: "city"` e apenas ajuste os filtros de data, pois o backend não suporta agrupamento temporal direto no input.
 
 ### FILTROS E CAMPOS (SCHEMA):
 Preencha apenas o que for solicitado ou estritamente inferido:
-- **disease_acronym**: Normalize para o padrão do banco (ex: "DENG" para Dengue, "ZIKA", "CHIK").
+- **disease_acronym**: Normalize para o padrão do banco. Exemplos:
+  - "DENG" para Dengue, "ZIKA" para Zika, "CHIK" para Chikungunya
+  - "LEPT" para Leptospirose, "COQU" para Coqueluche
+  - "LEIV" para Leishmaniose Visceral, "LTAN" para Leishmaniose Tegumentar
+  - "HANS" para Hanseníase, "MENI" para Meningite
+  - "HEPA" para Hepatites Virais, "HANT" para Hantavirose
+  - "ANIM" para Animais Peçonhentos, "IEXO" para Intoxicação Exógena
+  - "MALA" para Malária, "ESQU" para Esquistossomose
+  - "TUBE" para Tuberculose, "CHAG" para Doença de Chagas
+  - "RAIV" para Raiva, "FMAC" para Febre Maculosa, "FAMA" para Febre Amarela
+  Mesmo com grafias alternativas (ex: "lepitospirose", "coquelute"), identifique a doença correta.
 - **start_date / end_date**: Formato YYYY-MM-DD.
 - **min_age / max_age**: Inteiros.
 - **patient_sex**: "M" (Masculino), "F" (Feminino).
