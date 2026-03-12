@@ -2,10 +2,9 @@ import os
 from app.etl.downloader.sinan_downloader import download_raw_data, get_disease_list
 from app.etl.cleaner.sinan_cleaner import filter_state_and_columns
 from app.utils.logger import logger
-
+import pandas as pd
 
 def main():
-    YEAR = 2025
     STATE_CODE_PB = "25"
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,49 +22,80 @@ def main():
         "ID_UNIDADE",
         "ID_MUNICIP",
         "ID_MN_RESI",
-    ]  # DATA, O Posot de Saúde, Município
+    ]  # DATA, O Posto de Saúde, Município
     OPTIONAL = ["NU_IDADE_N", "CS_SEXO", "EVOLUCAO"]
-
-    logger.info(f"Starting ETL process for year {YEAR}")
-
     disease_list = get_disease_list()
 
-    for acronym, name in disease_list.items():
-        logger.info(f"Processing disease: {name} ({acronym})")
+    for YEAR in range(2023, 2027):
 
-        try:
-            raw_df = download_raw_data(acronym, YEAR)
+        logger.info(f"Starting ETL process for year {YEAR}")
 
-            if raw_df.empty:
-                logger.warning(f"No data returned for {acronym} in {YEAR}")
-                continue
+        acronyms_to_skip = {"ACBI", "ACGR", "ANIM", "MENT", "PAIR", "VIOL"}
+        for acronym, name in disease_list.items():
 
-            raw_file_path = os.path.join(RAW_DATA_DIR, f"{acronym}_{YEAR}.csv")
-            raw_df.to_csv(raw_file_path, sep=";", index=False)
-            logger.debug(f"Raw data saved to {raw_file_path}")
-
-            processed_df = filter_state_and_columns(
-                raw_df, STATE_CODE_PB, MANDATORY, OPTIONAL
-            )
-
-            if processed_df.empty:
-                logger.info(
-                    f"National data downloaded for {acronym}, but no cases found for PB"
+            if acronym == "DENG" and YEAR == 2024:
+                raw_df_file = RAW_DATA_DIR + "/DENG_2024.csv"
+                raw_df = pd.read_csv(raw_df_file, sep=";")
+                processed_df = filter_state_and_columns(
+                    raw_df, STATE_CODE_PB, MANDATORY, OPTIONAL
                 )
+
+                if processed_df.empty:
+                    logger.info(
+                        f"National data downloaded for {acronym}, but no cases found for PB"
+                    )
+                    continue
+
+                processed_file_path = os.path.join(
+                    PROCESSED_DATA_DIR, f"{acronym}_{YEAR}_PB.csv"
+                )
+                processed_df.to_csv(processed_file_path, sep=";", index=False)
+                logger.info(
+                    f"Successfully processed {len(processed_df)} cases for {acronym} in PB"
+                )
+
+                del raw_df
+                del processed_df
+                continue
+            if acronym in acronyms_to_skip:
+                logger.info(f"Skipping disease: {name} ({acronym})")
                 continue
 
-            processed_file_path = os.path.join(
-                PROCESSED_DATA_DIR, f"{acronym}_{YEAR}_PB.csv"
-            )
-            processed_df.to_csv(processed_file_path, sep=";", index=False)
-            logger.info(
-                f"Successfully processed {len(processed_df)} cases for {acronym} in PB"
-            )
+            logger.info(f"Processing disease: {name} ({acronym})")
 
-            del raw_df
-            del processed_df
-        except Exception as e:
-            logger.error(f"Critical error processing {acronym}: {str(e)}")
+            try:
+                raw_df = download_raw_data(acronym, YEAR)
+
+                if raw_df.empty:
+                    logger.warning(f"No data returned for {acronym} in {YEAR}")
+                    continue
+
+                raw_file_path = os.path.join(RAW_DATA_DIR, f"{acronym}_{YEAR}.csv")
+                raw_df.to_csv(raw_file_path, sep=";", index=False)
+                logger.debug(f"Raw data saved to {raw_file_path}")
+
+                processed_df = filter_state_and_columns(
+                    raw_df, STATE_CODE_PB, MANDATORY, OPTIONAL
+                )
+
+                if processed_df.empty:
+                    logger.info(
+                        f"National data downloaded for {acronym}, but no cases found for PB"
+                    )
+                    continue
+
+                processed_file_path = os.path.join(
+                    PROCESSED_DATA_DIR, f"{acronym}_{YEAR}_PB.csv"
+                )
+                processed_df.to_csv(processed_file_path, sep=";", index=False)
+                logger.info(
+                    f"Successfully processed {len(processed_df)} cases for {acronym} in PB"
+                )
+
+                del raw_df
+                del processed_df
+            except Exception as e:
+                logger.error(f"Critical error processing {acronym}: {str(e)}")
 
     logger.info("ETL process finished.")
 

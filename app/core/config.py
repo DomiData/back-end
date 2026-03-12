@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     POPULATE_DB: bool = False
     GOOGLE_API_KEY: str
     FIREBASE_CREDENTIALS_PATH: FilePath
+    NEW_DATA: bool = False
 
     OPENAI_API_KEY: str = ""
 
