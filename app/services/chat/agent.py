@@ -5,27 +5,36 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 from pydantic import SecretStr
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schema.chat import ChatMessageResponse, SourceReference
 from app.services.chat.prompts import DISCLAIMER_PT, SYSTEM_PROMPT
-from app.services.chat.tools import ALL_TOOLS, set_data_dir
+from app.services.chat.tools import create_agent_tools
 
 logger = logging.getLogger(__name__)
 
+_llm: ChatOpenAI | None = None
 
-def create_chat_agent(openai_api_key: str, data_dir: str):
+
+def _get_llm(openai_api_key: str) -> ChatOpenAI:
+    global _llm
+    if _llm is None:
+        _llm = ChatOpenAI(
+            model="gpt-4o",
+            temperature=0.3,
+            api_key=SecretStr(openai_api_key),
+        )
+    return _llm
+
+
+def create_chat_agent(openai_api_key: str, session: AsyncSession):
     """Create and return a configured langgraph react agent."""
-    set_data_dir(data_dir)
-
-    llm = ChatOpenAI(
-        model="gpt-4o",
-        temperature=0.3,
-        api_key=SecretStr(openai_api_key),
-    )
+    llm = _get_llm(openai_api_key)
+    tools = create_agent_tools(session)
 
     agent = create_react_agent(
         model=llm,
-        tools=ALL_TOOLS,
+        tools=tools,
         prompt=SYSTEM_PROMPT,
     )
 
