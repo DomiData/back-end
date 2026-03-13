@@ -37,8 +37,7 @@ class AgentQueryBuilder:
         rows = await qb.execute()
         return [{"acronym": r.acronym, "name": r.name} for r in rows]
 
-    async def get_trend(self, disease_acronym: str) -> dict[str, Any]:
-        f = Filters(disease_acronym=disease_acronym)
+    async def get_trend(self, filters: Filters) -> dict[str, Any]:
         qb = QueryBuilder(self.session)
 
         year_col = extract("year", Occurrence.notification_date).label("year")
@@ -46,7 +45,7 @@ class AgentQueryBuilder:
         count_col = func.count(Occurrence.id).label("cases")
 
         qb.select(year_col, month_col, count_col)
-        qb.apply_filters(f)
+        qb.apply_filters(filters)
         qb.group_by(year_col, month_col)
         qb.stmt = qb.stmt.order_by(year_col, month_col)
 
@@ -55,7 +54,7 @@ class AgentQueryBuilder:
         if not rows:
             return {
                 "available": False,
-                "message": f"Nenhum dado encontrado para '{disease_acronym}'.",
+                "message": f"Nenhum dado encontrado para '{filters.disease_acronym}' com os filtros aplicados.",
             }
 
         monthly_data: list[dict[str, Any]] = [
@@ -77,7 +76,7 @@ class AgentQueryBuilder:
 
         return {
             "available": True,
-            "disease_code": disease_acronym.upper(),
+            "disease_code": filters.disease_acronym.upper(),
             "total_periods": len(monthly_data),
             "date_range": f"{monthly_data[0]['period']} a {monthly_data[-1]['period']}",
             "total_cases": total,
@@ -88,8 +87,7 @@ class AgentQueryBuilder:
             "recent_periods": monthly_data[-6:],
         }
 
-    async def get_seasonality(self, disease_acronym: str) -> dict[str, Any]:
-        f = Filters(disease_acronym=disease_acronym)
+    async def get_seasonality(self, filters: Filters) -> dict[str, Any]:
         qb = QueryBuilder(self.session)
 
         month_col = extract("month", Occurrence.notification_date).label("month")
@@ -99,7 +97,7 @@ class AgentQueryBuilder:
         ).label("num_years")
 
         qb.select(month_col, count_col, years_col)
-        qb.apply_filters(f)
+        qb.apply_filters(filters)
         qb.group_by(month_col)
         qb.stmt = qb.stmt.order_by(month_col)
 
@@ -108,7 +106,7 @@ class AgentQueryBuilder:
         if not rows:
             return {
                 "available": False,
-                "message": f"Nenhum dado de sazonalidade encontrado para '{disease_acronym}'.",
+                "message": f"Nenhum dado de sazonalidade encontrado para '{filters.disease_acronym}' com os filtros aplicados.",
             }
 
         monthly_data: list[dict[str, Any]] = []
@@ -134,7 +132,7 @@ class AgentQueryBuilder:
 
         return {
             "available": True,
-            "disease_code": disease_acronym.upper(),
+            "disease_code": filters.disease_acronym.upper(),
             "monthly_averages": monthly_data,
             "peak_month": peak["month_name"],
             "peak_month_avg_cases": peak["avg_cases"],
@@ -144,23 +142,21 @@ class AgentQueryBuilder:
             "low_season": low_season,
         }
 
-    async def get_demographics(self, disease_acronym: str) -> dict[str, Any]:
-        f = Filters(disease_acronym=disease_acronym)
-
+    async def get_demographics(self, filters: Filters) -> dict[str, Any]:
         # Sex distribution
         qb_sex = QueryBuilder(self.session)
         qb_sex.select(
             Occurrence.patient_sex.label("sex"),
             func.count(Occurrence.id).label("count"),
         )
-        qb_sex.apply_filters(f)
+        qb_sex.apply_filters(filters)
         qb_sex.group_by(Occurrence.patient_sex)
         sex_rows = await qb_sex.execute()
 
         if not sex_rows:
             return {
                 "available": False,
-                "message": f"Nenhum dado demografico encontrado para '{disease_acronym}'.",
+                "message": f"Nenhum dado demografico encontrado para '{filters.disease_acronym}' com os filtros aplicados.",
             }
 
         sex_dist = {r.sex or "nao_informado": int(r.count) for r in sex_rows}
@@ -173,7 +169,7 @@ class AgentQueryBuilder:
             func.max(Occurrence.patient_age).label("max_age"),
             func.count(Occurrence.id).label("total"),
         )
-        qb_age.apply_filters(f)
+        qb_age.apply_filters(filters)
         age_row = (await qb_age.execute())[0]
 
         # Evolution distribution
@@ -182,7 +178,7 @@ class AgentQueryBuilder:
             Occurrence.evolution.label("evolution"),
             func.count(Occurrence.id).label("count"),
         )
-        qb_evo.apply_filters(f)
+        qb_evo.apply_filters(filters)
         qb_evo.group_by(Occurrence.evolution)
         evo_rows = await qb_evo.execute()
 
@@ -190,7 +186,7 @@ class AgentQueryBuilder:
 
         return {
             "available": True,
-            "disease_code": disease_acronym.upper(),
+            "disease_code": filters.disease_acronym.upper(),
             "total_cases": int(age_row.total),
             "sex_distribution": sex_dist,
             "age_stats": {
@@ -201,9 +197,7 @@ class AgentQueryBuilder:
             "evolution_distribution": evo_dist,
         }
 
-    async def get_geographic_distribution(self, disease_acronym: str) -> dict[str, Any]:
-        f = Filters(disease_acronym=disease_acronym)
-
+    async def get_geographic_distribution(self, filters: Filters) -> dict[str, Any]:
         # Cases by district
         qb_dist = QueryBuilder(self.session)
         qb_dist.select(
@@ -211,7 +205,7 @@ class AgentQueryBuilder:
             func.count(Occurrence.id).label("count"),
         )
         qb_dist.base_join("health_unit")
-        qb_dist.apply_filters(f)
+        qb_dist.apply_filters(filters)
         qb_dist.group_by(HealthUnit.district)
         qb_dist.stmt = qb_dist.stmt.order_by(func.count(Occurrence.id).desc())
         dist_rows = await qb_dist.execute()
@@ -219,7 +213,7 @@ class AgentQueryBuilder:
         if not dist_rows:
             return {
                 "available": False,
-                "message": f"Nenhum dado geografico encontrado para '{disease_acronym}'.",
+                "message": f"Nenhum dado geografico encontrado para '{filters.disease_acronym}' com os filtros aplicados.",
             }
 
         districts = [
@@ -235,7 +229,7 @@ class AgentQueryBuilder:
             func.count(Occurrence.id).label("count"),
         )
         qb_units.base_join("health_unit")
-        qb_units.apply_filters(f)
+        qb_units.apply_filters(filters)
         qb_units.group_by(HealthUnit.name, HealthUnit.district)
         qb_units.stmt = qb_units.stmt.order_by(func.count(Occurrence.id).desc()).limit(
             10
@@ -253,24 +247,22 @@ class AgentQueryBuilder:
 
         return {
             "available": True,
-            "disease_code": disease_acronym.upper(),
+            "disease_code": filters.disease_acronym.upper(),
             "by_district": districts,
             "top_health_units": top_units,
             "total_districts": len(districts),
         }
 
     async def get_distribution_by_municipality(
-        self, disease_acronym: str
+        self, filters: Filters
     ) -> dict[str, Any]:
-        f = Filters(disease_acronym=disease_acronym)
-
         qb = QueryBuilder(self.session)
         qb.select(
             HealthUnit.city_code.label("city_code"),
             func.count(Occurrence.id).label("count"),
         )
         qb.base_join("health_unit")
-        qb.apply_filters(f)
+        qb.apply_filters(filters)
         qb.group_by(HealthUnit.city_code)
         qb.stmt = qb.stmt.order_by(func.count(Occurrence.id).desc())
         rows = await qb.execute()
@@ -279,7 +271,7 @@ class AgentQueryBuilder:
             return {
                 "available": False,
                 "message": (
-                    f"Nenhum dado por municipio encontrado para '{disease_acronym}'."
+                    f"Nenhum dado por municipio encontrado para '{filters.disease_acronym}' com os filtros aplicados."
                 ),
             }
 
@@ -295,7 +287,7 @@ class AgentQueryBuilder:
 
         return {
             "available": True,
-            "disease_code": disease_acronym.upper(),
+            "disease_code": filters.disease_acronym.upper(),
             "by_municipality": municipalities[:20],
             "total_municipalities": len(municipalities),
             "total_cases": total_cases,

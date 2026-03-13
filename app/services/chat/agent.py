@@ -8,7 +8,7 @@ from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schema.chat import ChatMessageResponse, SourceReference
-from app.services.chat.prompts import DISCLAIMER_PT, SYSTEM_PROMPT
+from app.services.chat.prompts import DISCLAIMER_PT, SYSTEM_PROMPT_TEMPLATE
 from app.services.chat.tools import create_agent_tools
 
 logger = logging.getLogger(__name__)
@@ -29,13 +29,19 @@ def _get_llm(openai_api_key: str) -> ChatOpenAI:
 
 def create_chat_agent(openai_api_key: str, session: AsyncSession):
     """Create and return a configured langgraph react agent."""
+    from datetime import date
+
     llm = _get_llm(openai_api_key)
     tools = create_agent_tools(session)
+
+    system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
+        current_date=date.today().isoformat(),
+    )
 
     agent = create_react_agent(
         model=llm,
         tools=tools,
-        prompt=SYSTEM_PROMPT,
+        prompt=system_prompt,
     )
 
     return agent
