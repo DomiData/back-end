@@ -208,14 +208,27 @@ def create_agent_tools(session: AsyncSession) -> list:
             data_fim: Data final no formato YYYY-MM-DD
         """
         filters = _build_filters(
-            doenca, sexo, idade_min, idade_max, evolucao,
-            codigo_municipio, tipo_unidade, data_inicio, data_fim,
+            doenca,
+            sexo,
+            idade_min,
+            idade_max,
+            evolucao,
+            codigo_municipio,
+            tipo_unidade,
+            data_inicio,
+            data_fim,
         )
         result = await builder.get_trend(filters)
         if result.get("available"):
             filter_desc = _describe_filters(
-                sexo, idade_min, idade_max, evolucao,
-                codigo_municipio, tipo_unidade, data_inicio, data_fim,
+                sexo,
+                idade_min,
+                idade_max,
+                evolucao,
+                codigo_municipio,
+                tipo_unidade,
+                data_inicio,
+                data_fim,
             )
             result["tipo_fonte"] = "database"
             result["detalhe_fonte"] = f"banco de dados - tendencia {doenca}"
@@ -253,14 +266,27 @@ def create_agent_tools(session: AsyncSession) -> list:
             data_fim: Data final no formato YYYY-MM-DD
         """
         filters = _build_filters(
-            doenca, sexo, idade_min, idade_max, evolucao,
-            codigo_municipio, tipo_unidade, data_inicio, data_fim,
+            doenca,
+            sexo,
+            idade_min,
+            idade_max,
+            evolucao,
+            codigo_municipio,
+            tipo_unidade,
+            data_inicio,
+            data_fim,
         )
         result = await builder.get_seasonality(filters)
         if result.get("available"):
             filter_desc = _describe_filters(
-                sexo, idade_min, idade_max, evolucao,
-                codigo_municipio, tipo_unidade, data_inicio, data_fim,
+                sexo,
+                idade_min,
+                idade_max,
+                evolucao,
+                codigo_municipio,
+                tipo_unidade,
+                data_inicio,
+                data_fim,
             )
             result["tipo_fonte"] = "database"
             result["detalhe_fonte"] = f"banco de dados - sazonalidade {doenca}"
@@ -298,14 +324,27 @@ def create_agent_tools(session: AsyncSession) -> list:
             data_fim: Data final no formato YYYY-MM-DD
         """
         filters = _build_filters(
-            doenca, sexo, idade_min, idade_max, evolucao,
-            codigo_municipio, tipo_unidade, data_inicio, data_fim,
+            doenca,
+            sexo,
+            idade_min,
+            idade_max,
+            evolucao,
+            codigo_municipio,
+            tipo_unidade,
+            data_inicio,
+            data_fim,
         )
         result = await builder.get_demographics(filters)
         if result.get("available"):
             filter_desc = _describe_filters(
-                sexo, idade_min, idade_max, evolucao,
-                codigo_municipio, tipo_unidade, data_inicio, data_fim,
+                sexo,
+                idade_min,
+                idade_max,
+                evolucao,
+                codigo_municipio,
+                tipo_unidade,
+                data_inicio,
+                data_fim,
             )
             result["tipo_fonte"] = "database"
             result["detalhe_fonte"] = f"banco de dados - demograficos {doenca}"
@@ -343,14 +382,27 @@ def create_agent_tools(session: AsyncSession) -> list:
             data_fim: Data final no formato YYYY-MM-DD
         """
         filters = _build_filters(
-            doenca, sexo, idade_min, idade_max, evolucao,
-            codigo_municipio, tipo_unidade, data_inicio, data_fim,
+            doenca,
+            sexo,
+            idade_min,
+            idade_max,
+            evolucao,
+            codigo_municipio,
+            tipo_unidade,
+            data_inicio,
+            data_fim,
         )
         result = await builder.get_geographic_distribution(filters)
         if result.get("available"):
             filter_desc = _describe_filters(
-                sexo, idade_min, idade_max, evolucao,
-                codigo_municipio, tipo_unidade, data_inicio, data_fim,
+                sexo,
+                idade_min,
+                idade_max,
+                evolucao,
+                codigo_municipio,
+                tipo_unidade,
+                data_inicio,
+                data_fim,
             )
             result["tipo_fonte"] = "database"
             result["detalhe_fonte"] = (
@@ -390,14 +442,27 @@ def create_agent_tools(session: AsyncSession) -> list:
             data_fim: Data final no formato YYYY-MM-DD
         """
         filters = _build_filters(
-            doenca, sexo, idade_min, idade_max, evolucao,
-            None, tipo_unidade, data_inicio, data_fim,
+            doenca,
+            sexo,
+            idade_min,
+            idade_max,
+            evolucao,
+            None,
+            tipo_unidade,
+            data_inicio,
+            data_fim,
         )
         result = await builder.get_distribution_by_municipality(filters)
         if result.get("available"):
             filter_desc = _describe_filters(
-                sexo, idade_min, idade_max, evolucao,
-                None, tipo_unidade, data_inicio, data_fim,
+                sexo,
+                idade_min,
+                idade_max,
+                evolucao,
+                None,
+                tipo_unidade,
+                data_inicio,
+                data_fim,
             )
             result["tipo_fonte"] = "database"
             result["detalhe_fonte"] = (

@@ -26,6 +26,10 @@ MONTH_NAMES_PT = {
 }
 
 
+def _disease_code(filters: Filters) -> str:
+    return (filters.disease_acronym or "").upper()
+
+
 class AgentQueryBuilder:
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -76,7 +80,7 @@ class AgentQueryBuilder:
 
         return {
             "available": True,
-            "disease_code": filters.disease_acronym.upper(),
+            "disease_code": _disease_code(filters),
             "total_periods": len(monthly_data),
             "date_range": f"{monthly_data[0]['period']} a {monthly_data[-1]['period']}",
             "total_cases": total,
@@ -132,7 +136,7 @@ class AgentQueryBuilder:
 
         return {
             "available": True,
-            "disease_code": filters.disease_acronym.upper(),
+            "disease_code": _disease_code(filters),
             "monthly_averages": monthly_data,
             "peak_month": peak["month_name"],
             "peak_month_avg_cases": peak["avg_cases"],
@@ -186,7 +190,7 @@ class AgentQueryBuilder:
 
         return {
             "available": True,
-            "disease_code": filters.disease_acronym.upper(),
+            "disease_code": _disease_code(filters),
             "total_cases": int(age_row.total),
             "sex_distribution": sex_dist,
             "age_stats": {
@@ -247,7 +251,7 @@ class AgentQueryBuilder:
 
         return {
             "available": True,
-            "disease_code": filters.disease_acronym.upper(),
+            "disease_code": _disease_code(filters),
             "by_district": districts,
             "top_health_units": top_units,
             "total_districts": len(districts),
@@ -283,11 +287,11 @@ class AgentQueryBuilder:
             for r in rows
         ]
 
-        total_cases = sum(m["cases"] for m in municipalities)
+        total_cases: int = sum(int(m["cases"]) for m in municipalities)
 
         return {
             "available": True,
-            "disease_code": filters.disease_acronym.upper(),
+            "disease_code": _disease_code(filters),
             "by_municipality": municipalities[:20],
             "total_municipalities": len(municipalities),
             "total_cases": total_cases,
