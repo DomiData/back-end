@@ -4,6 +4,7 @@ from app.etl.cleaner.sinan_cleaner import filter_state_and_columns
 from app.utils.logger import logger
 import pandas as pd
 
+
 def main():
     STATE_CODE_PB = "25"
 
@@ -27,12 +28,10 @@ def main():
     disease_list = get_disease_list()
 
     for YEAR in range(2023, 2027):
-
         logger.info(f"Starting ETL process for year {YEAR}")
 
         acronyms_to_skip = {"ACBI", "ACGR", "ANIM", "MENT", "PAIR", "VIOL"}
         for acronym, name in disease_list.items():
-
             if acronym == "DENG" and YEAR == 2024:
                 raw_df_file = RAW_DATA_DIR + "/DENG_2024.csv"
                 raw_df = pd.read_csv(raw_df_file, sep=";")
