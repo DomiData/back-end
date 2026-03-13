@@ -16,7 +16,6 @@ firebase-admin
 greenlet
 langchain>=0.3
 langchain-openai>=0.3
-langchain-google-genai
 langgraph>=0.2
 openai>=1.0
 pytest

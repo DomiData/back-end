@@ -1,8 +1,9 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from functools import lru_cache
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
+from pydantic import SecretStr
 from app.schema.builder.heatmap_input import HeatmapBuilderInput
 from app.core.config import settings
 
@@ -100,11 +101,10 @@ Considere HOJE = 2026-05-20 para os exemplos abaixo:
 
 class QueryIntentParser:
     def __init__(self):
-        self.llm = ChatGoogleGenerativeAI(
-            model="gemini-3-flash-preview",
+        self.llm = ChatOpenAI(
+            model="gpt-4o",
             temperature=0,
-            google_api_key=settings.GOOGLE_API_KEY,
-            convert_system_message_to_human=True,
+            api_key=SecretStr(settings.OPENAI_API_KEY),
         )
         self.structured_llm = self.llm.with_structured_output(HeatmapBuilderInput)
         self.prompt = ChatPromptTemplate.from_messages(
