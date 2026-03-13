@@ -1,3 +1,7 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+
 # File created using '.gitignore Generator' for Visual Studio Code: https://bit.ly/vscode-gig
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,linux,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,linux,python
@@ -141,6 +145,7 @@ celerybeat.pid
 
 # Environments
 .env
+.envrc
 .venv
 env/
 venv/
@@ -214,8 +219,16 @@ test.db
 docs/CNAME
 .python-version
 .changelog_generator.toml
-.envrc
 .clinerules
 .cursorrules
 .windsurfrules
 users.seed
+
+# ETL data
+cnes/
+data/raw/
+data/processed/
+
+# Firebase credentials
+firebase-credentials.json
+domidata-*.json

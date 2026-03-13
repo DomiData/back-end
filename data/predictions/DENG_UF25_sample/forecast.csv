@@ -1,0 +1,13 @@
+date,predicted_cases,model
+2020-01-01,3245.5,Prophet
+2020-02-01,4567.3,Prophet
+2020-03-01,5432.1,Prophet
+2020-04-01,4123.8,Prophet
+2020-05-01,2876.4,Prophet
+2020-06-01,1543.2,Prophet
+2020-07-01,876.5,Prophet
+2020-08-01,432.1,Prophet
+2020-09-01,298.7,Prophet
+2020-10-01,345.2,Prophet
+2020-11-01,567.8,Prophet
+2020-12-01,1234.6,Prophet
