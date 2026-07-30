@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Numeric
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from app.core.base import Base
 
 
 class HealthUnit(Base):

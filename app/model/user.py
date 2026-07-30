@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import ARRAY
 from typing import List
 import uuid
-from app.core.database import Base
+from app.core.base import Base
 
 
 class User(Base):

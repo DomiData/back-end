@@ -57,3 +57,20 @@ Inicie o servidor de desenvolvimento:
 uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
 ```
 
+### 6. Migrations do Banco
+
+O schema do banco e versionado com Alembic. Antes de iniciar a aplicacao em um
+banco novo ou apos receber novas migrations, execute:
+
+```bash
+alembic upgrade head
+```
+
+Para criar uma nova migration a partir de alteracoes nos models:
+
+```bash
+alembic revision --autogenerate -m "descricao da alteracao"
+```
+
+Revise a migration gerada antes de aplica-la em qualquer ambiente compartilhado
+ou de producao.

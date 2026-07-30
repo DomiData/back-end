@@ -9,6 +9,7 @@ uvicorn
 sqlalchemy
 pydantic-settings
 asyncpg
+alembic
 colorlog
 python-dotenv
 tqdm

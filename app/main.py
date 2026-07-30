@@ -2,7 +2,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import create_db, SessionLocal, get_db
+from app.core.database import SessionLocal, get_db
 from app.core.firebase import initialize_firebase_app
 from app.core.config import settings
 from app.api.user import router as user_router
@@ -19,7 +19,6 @@ from app.services.parser import QueryIntentParser, get_query_intent_parser
 
 
 async def lifespan(app: FastAPI):
-    await create_db()
     initialize_firebase_app()
     if settings.POPULATE_DB:
         async with SessionLocal() as session:
