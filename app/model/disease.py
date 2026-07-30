@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from app.core.base import Base
 
 
 class Disease(Base):

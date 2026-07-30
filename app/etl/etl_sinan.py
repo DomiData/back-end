@@ -32,30 +32,16 @@ def main():
 
         acronyms_to_skip = {"ACBI", "ACGR", "ANIM", "MENT", "PAIR", "VIOL"}
         for acronym, name in disease_list.items():
+            raw_df = None
             if acronym == "DENG" and YEAR == 2024:
                 raw_df_file = RAW_DATA_DIR + "/DENG_2024.csv"
-                raw_df = pd.read_csv(raw_df_file, sep=";")
-                processed_df = filter_state_and_columns(
-                    raw_df, STATE_CODE_PB, MANDATORY, OPTIONAL
-                )
-
-                if processed_df.empty:
-                    logger.info(
-                        f"National data downloaded for {acronym}, but no cases found for PB"
+                if os.path.exists(raw_df_file):
+                    logger.info(f"Using cached raw data file: {raw_df_file}")
+                    raw_df = pd.read_csv(raw_df_file, sep=";")
+                else:
+                    logger.warning(
+                        f"Cached raw data file not found: {raw_df_file}. Downloading from SINAN."
                     )
-                    continue
-
-                processed_file_path = os.path.join(
-                    PROCESSED_DATA_DIR, f"{acronym}_{YEAR}_PB.csv"
-                )
-                processed_df.to_csv(processed_file_path, sep=";", index=False)
-                logger.info(
-                    f"Successfully processed {len(processed_df)} cases for {acronym} in PB"
-                )
-
-                del raw_df
-                del processed_df
-                continue
             if acronym in acronyms_to_skip:
                 logger.info(f"Skipping disease: {name} ({acronym})")
                 continue
@@ -63,7 +49,8 @@ def main():
             logger.info(f"Processing disease: {name} ({acronym})")
 
             try:
-                raw_df = download_raw_data(acronym, YEAR)
+                if raw_df is None:
+                    raw_df = download_raw_data(acronym, YEAR)
 
                 if raw_df.empty:
                     logger.warning(f"No data returned for {acronym} in {YEAR}")
