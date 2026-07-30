@@ -74,3 +74,30 @@ alembic revision --autogenerate -m "descricao da alteracao"
 
 Revise a migration gerada antes de aplica-la em qualquer ambiente compartilhado
 ou de producao.
+
+### 7. Rodar ETL
+
+O ETL roda separado do startup da API. Para carregar no banco os arquivos ja
+processados em `cnes/` e `data/processed/`, execute:
+
+```bash
+python -m app.commands.run_etl
+```
+
+Para baixar/processar novos dados antes da carga:
+
+```bash
+python -m app.commands.run_etl --new-data
+```
+
+Tambem e possivel executar como job pelo Docker Compose:
+
+```bash
+docker compose --profile jobs run --rm etl
+```
+
+Com novos dados:
+
+```bash
+docker compose --profile jobs run --rm etl python -m app.commands.run_etl --new-data
+```

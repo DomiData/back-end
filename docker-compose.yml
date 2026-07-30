@@ -9,13 +9,19 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   migrate:
     build: .
     env_file:
       - ".env"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: alembic upgrade head
 
   app:
@@ -30,6 +36,19 @@ services:
       migrate:
         condition: service_completed_successfully
     command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+
+  etl:
+    build: .
+    env_file:
+      - ".env"
+    volumes:
+      - .:/app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    profiles:
+      - jobs
+    command: python -m app.commands.run_etl
 
   pgadmin:
     image: dpage/pgadmin4
