@@ -1,7 +1,14 @@
-from pysus.online_data.SINAN import download  # type: ignore
-from pysus.ftp.databases.sinan import SINAN  # type: ignore
+import asyncio
+from pathlib import Path
+
 import pandas as pd
+from pysus.api.ftp.client import FTP  # type: ignore
+from pysus.api.ftp.databases import SINAN  # type: ignore
+
 from app.utils.logger import logger
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
 def normalize_pysus_return(raw_data):
@@ -29,9 +36,8 @@ def normalize_pysus_return(raw_data):
 
 def get_disease_list():
     try:
-        logger.info("Connecting to SINAN metadata...")
-        sinan_metadata = SINAN().load()
-        return sinan_metadata.diseases
+        logger.info("Loading SINAN metadata...")
+        return SINAN.model_fields["group_definitions"].default
     except Exception as e:
         logger.warning(f"Metadata offline or unreachable ({e}). Using fallback list.")
         return {
@@ -44,10 +50,38 @@ def get_disease_list():
         }
 
 
+async def _download_raw_data(acronym, year):
+    client = FTP()
+    await client.login()
+
+    try:
+        dataset = SINAN(client=client)
+        files = await dataset.search(year=int(year))
+        matches = [
+            file
+            for file in files
+            if file.group is not None and file.group.name == acronym
+        ]
+
+        if not matches:
+            logger.warning(f"No SINAN file found for {acronym} in {year}.")
+            return pd.DataFrame()
+
+        remote_file = sorted(
+            matches,
+            key=lambda file: "PRELIM" in str(file.path).upper(),
+        )[0]
+        cache_dir = PROJECT_ROOT / "data" / "raw" / "pysus_cache"
+        local_file = await remote_file.download(output=cache_dir)
+        return await local_file.load()
+    finally:
+        await client.close()
+
+
 def download_raw_data(acronym, year):
     logger.info(f"Downloading data for {acronym} (Year: {year})...")
     try:
-        raw_data = download(diseases=acronym, years=year)
+        raw_data = asyncio.run(_download_raw_data(acronym, year))
         df = normalize_pysus_return(raw_data)
 
         if df.empty:
