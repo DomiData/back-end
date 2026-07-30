@@ -3,8 +3,13 @@ from app.schema.export import ExportDashboardData, ExportHeatmapData
 from app.services.export.export import ExportService
 from app.utils.util import secure_filename
 from app.api.deps import get_export_service
+from app.core.security import get_firebase_claims
 
-router = APIRouter(prefix="/export", tags=["Export"])
+router = APIRouter(
+    prefix="/export",
+    tags=["Export"],
+    dependencies=[Depends(get_firebase_claims)],
+)
 
 
 def build_export_response(

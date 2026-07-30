@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.firebase import initialize_firebase_app
 from app.core.config import settings
+from app.core.security import get_firebase_claims
 from app.api.user import router as user_router
 from app.api.chat import router as chat_router
 from app.api.export import router as export_router
@@ -47,7 +48,9 @@ async def heatmap(params: HeatmapBuilderInput, session: AsyncSession = Depends(g
 
 @app.post("/dashboard")
 async def dashboard(
-    params: DashboardBuilderInput, session: AsyncSession = Depends(get_db)
+    params: DashboardBuilderInput,
+    session: AsyncSession = Depends(get_db),
+    claims: dict = Depends(get_firebase_claims),
 ):
     query_builder = DashboardQueryBuilder(session)
     result = await query_builder.build(params)
