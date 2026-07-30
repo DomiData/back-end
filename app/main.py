@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.api.user import router as user_router
 from app.api.chat import router as chat_router
 from app.api.export import router as export_router
+from app.api.health import router as health_router
 from app.schema.builder import HeatmapBuilderInput
 from app.schema.builder.dashboard_input import DashboardBuilderInput
 from app.repository.query.dashboard_builder import DashboardQueryBuilder
@@ -34,6 +35,7 @@ app.add_middleware(
 app.include_router(user_router)
 app.include_router(chat_router)
 app.include_router(export_router)
+app.include_router(health_router)
 
 
 @app.post("/heatmap")
